@@ -1,7 +1,36 @@
 "use client";
 
-import { useRef } from "react";
-import { Image } from "@react-three/drei";
+import { Suspense, useRef } from "react";
+import { useLoader } from "@react-three/fiber";
+import * as THREE from "three";
+
+function PaintingTexture({ url, frameW, frameH }: { url: string; frameW: number; frameH: number }) {
+  try {
+    const texture = useLoader(THREE.TextureLoader, url);
+    return (
+      <mesh position={[0, 0, 0.02]}>
+        <planeGeometry args={[frameW, frameH]} />
+        <meshStandardMaterial map={texture} toneMapped={false} />
+      </mesh>
+    );
+  } catch {
+    return (
+      <mesh position={[0, 0, 0.02]}>
+        <planeGeometry args={[frameW, frameH]} />
+        <meshStandardMaterial color="#333" />
+      </mesh>
+    );
+  }
+}
+
+function PaintingFallback({ frameW, frameH }: { frameW: number; frameH: number }) {
+  return (
+    <mesh position={[0, 0, 0.02]}>
+      <planeGeometry args={[frameW, frameH]} />
+      <meshStandardMaterial color="#1a1a1a" />
+    </mesh>
+  );
+}
 
 export default function ArtworkFrame({
   artwork,
@@ -33,10 +62,7 @@ export default function ArtworkFrame({
   return (
     <group position={position} rotation={rotation}>
       {/* Backboard with userData for raycasting */}
-      <mesh
-        position={[0, 0, -0.05]}
-        userData={{ artworkId, title: artwork.title }}
-      >
+      <mesh position={[0, 0, -0.05]} userData={{ artworkId, title: artwork.title }}>
         <boxGeometry args={[frameW + 0.1, frameH + 0.1, 0.1]} />
         <meshStandardMaterial color={hovered ? "#333" : "#1a1a1a"} />
       </mesh>
@@ -47,22 +73,10 @@ export default function ArtworkFrame({
         <meshStandardMaterial color={hovered ? "#D4B96A" : "#8B7355"} metalness={0.6} roughness={0.3} />
       </mesh>
 
-      {/* Painting image */}
-      <group>
-        {/* Fallback colored panel while image loads */}
-        <mesh position={[0, 0, 0.01]}>
-          <planeGeometry args={[frameW, frameH]} />
-          <meshStandardMaterial color="#1a1a1a" />
-        </mesh>
-        {imgUrl && (
-          <Image
-            url={imgUrl}
-            position={[0, 0, 0.02]}
-            scale={[frameW, frameH]}
-            transparent
-          />
-        )}
-      </group>
+      {/* Painting texture with suspense fallback */}
+      <Suspense fallback={<PaintingFallback frameW={frameW} frameH={frameH} />}>
+        <PaintingTexture url={imgUrl} frameW={frameW} frameH={frameH} />
+      </Suspense>
     </group>
   );
 }
