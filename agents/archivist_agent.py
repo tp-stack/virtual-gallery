@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import re
+import ssl
 import urllib.request
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
@@ -15,10 +16,15 @@ AIC_SEARCH = "https://api.artic.edu/api/v1/artworks/search"
 
 executor = ThreadPoolExecutor(max_workers=10)
 
+# Create permissive SSL context for Vercel's Python environment
+_ssl_ctx = ssl.create_default_context()
+_ssl_ctx.check_hostname = False
+_ssl_ctx.verify_mode = ssl.CERT_NONE
+
 
 def _fetch_json(url: str, timeout: int = 15) -> dict:
     req = urllib.request.Request(url, headers={"User-Agent": "VirtualGallery/1.0"})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
+    with urllib.request.urlopen(req, timeout=timeout, context=_ssl_ctx) as resp:
         return json.loads(resp.read())
 
 
