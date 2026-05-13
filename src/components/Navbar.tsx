@@ -17,6 +17,7 @@ export default function Navbar() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/gallery", label: "Gallery" },
+    { href: "/tour", label: "3D Tour" },
   ];
 
   return (

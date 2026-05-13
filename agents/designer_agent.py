@@ -19,22 +19,66 @@ ROOM_STYLES = {
 }
 DEFAULT_STYLE = {"wall_color": "#E8E0D0", "floor": "concrete", "lighting": "neutral", "ambience": "modern"}
 
+ROOM_WIDTH = 30
+ROOM_DEPTH = 20
+ROOM_HEIGHT = 5
+DOORWAY_WIDTH = 4
+DOORWAY_HEIGHT = 3.5
+WALL_THICKNESS = 0.3
+
 class DesignerAgent:
     async def arrange(self, artworks: list[dict]) -> dict:
         rooms: dict[str, list] = defaultdict(list)
         for art in artworks:
-            rooms[art.get("movement", "Other")].append(art["id"])
+            rooms[art.get("movement", "Other")].append(art)
 
         gallery_rooms = []
-        for i, (movement, art_ids) in enumerate(rooms.items()):
+        for i, (movement, arts) in enumerate(rooms.items()):
             style = ROOM_STYLES.get(movement, DEFAULT_STYLE)
+            z_pos = i * ROOM_DEPTH
+
+            art_placements = []
+            count = len(arts)
+            spacing = ROOM_WIDTH * 0.7 / max(count, 1)
+
+            for j, art in enumerate(arts):
+                side = "left" if j % 2 == 0 else "right"
+                offset = ((j // 2) + 0.5) * spacing - ROOM_WIDTH * 0.35
+                x = offset if side == "left" else offset
+                z = z_pos + ROOM_DEPTH * 0.3
+                rot_y = 0 if side == "left" else 0
+
+                art_placements.append({
+                    "artwork_id": art["id"],
+                    "position": {"x": round(x, 2), "y": 1.6, "z": round(z, 2)},
+                    "rotationY": round(rot_y, 2),
+                    "side": side,
+                })
+
             gallery_rooms.append({
                 "id": f"room-{i+1}",
                 "name": f"The {movement} Wing",
                 "movement": movement,
-                "artwork_ids": art_ids,
+                "artwork_ids": [a["id"] for a in arts],
+                "artwork_placements": art_placements,
                 "style": style,
+                "dimensions": {"width": ROOM_WIDTH, "height": ROOM_HEIGHT, "depth": ROOM_DEPTH},
+                "doorway": {"width": DOORWAY_WIDTH, "height": DOORWAY_HEIGHT},
+                "position": {"x": 0, "y": 0, "z": z_pos},
             })
+
+        foyer = {
+            "id": "room-0",
+            "name": "Grand Entrance",
+            "movement": "Foyer",
+            "artwork_ids": [],
+            "artwork_placements": [],
+            "style": {"wall_color": "#1A1A1A", "floor": "polished_concrete", "lighting": "warm", "ambience": "grand"},
+            "dimensions": {"width": ROOM_WIDTH, "height": ROOM_HEIGHT, "depth": 10},
+            "doorway": {"width": DOORWAY_WIDTH, "height": DOORWAY_HEIGHT},
+            "position": {"x": 0, "y": 0, "z": -10},
+        }
+        gallery_rooms.insert(0, foyer)
 
         featured = next((a for a in artworks if a.get("highlight")), artworks[0])
         gallery = {

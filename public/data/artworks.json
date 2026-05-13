@@ -1,8 +1,35 @@
 {
   "gallery": {
     "name": "The Public Domain Masterpiece Gallery",
-    "rooms": 11,
+    "rooms": 12,
     "layout": [
+      {
+        "id": "room-0",
+        "name": "Grand Entrance",
+        "movement": "Foyer",
+        "artwork_ids": [],
+        "artwork_placements": [],
+        "style": {
+          "wall_color": "#1A1A1A",
+          "floor": "polished_concrete",
+          "lighting": "warm",
+          "ambience": "grand"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 10
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": -10
+        }
+      },
       {
         "id": "room-1",
         "name": "The Renaissance Wing",
@@ -12,11 +39,57 @@
           "birth-venus",
           "sistine-chapel"
         ],
+        "artwork_placements": [
+          {
+            "artwork_id": "mona-lisa",
+            "position": {
+              "x": -7.0,
+              "y": 1.6,
+              "z": 6.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          },
+          {
+            "artwork_id": "birth-venus",
+            "position": {
+              "x": -7.0,
+              "y": 1.6,
+              "z": 6.0
+            },
+            "rotationY": 0,
+            "side": "right"
+          },
+          {
+            "artwork_id": "sistine-chapel",
+            "position": {
+              "x": 0.0,
+              "y": 1.6,
+              "z": 6.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          }
+        ],
         "style": {
           "wall_color": "#F5F0E8",
           "floor": "marble",
           "lighting": "warm",
           "ambience": "classical"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 20
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
         }
       },
       {
@@ -27,11 +100,47 @@
           "starry-night",
           "sunday-la-grande-jatte"
         ],
+        "artwork_placements": [
+          {
+            "artwork_id": "starry-night",
+            "position": {
+              "x": -5.25,
+              "y": 1.6,
+              "z": 26.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          },
+          {
+            "artwork_id": "sunday-la-grande-jatte",
+            "position": {
+              "x": -5.25,
+              "y": 1.6,
+              "z": 26.0
+            },
+            "rotationY": 0,
+            "side": "right"
+          }
+        ],
         "style": {
           "wall_color": "#D4C5A9",
           "floor": "stone",
           "lighting": "warm",
           "ambience": "contemplative"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 20
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 20
         }
       },
       {
@@ -43,11 +152,57 @@
           "night-watch",
           "milkmaid"
         ],
+        "artwork_placements": [
+          {
+            "artwork_id": "girl-pearl-earring",
+            "position": {
+              "x": -7.0,
+              "y": 1.6,
+              "z": 46.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          },
+          {
+            "artwork_id": "night-watch",
+            "position": {
+              "x": -7.0,
+              "y": 1.6,
+              "z": 46.0
+            },
+            "rotationY": 0,
+            "side": "right"
+          },
+          {
+            "artwork_id": "milkmaid",
+            "position": {
+              "x": 0.0,
+              "y": 1.6,
+              "z": 46.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          }
+        ],
         "style": {
           "wall_color": "#2C1810",
           "floor": "dark_wood",
           "lighting": "dramatic",
           "ambience": "theatrical"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 20
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 40
         }
       },
       {
@@ -57,11 +212,37 @@
         "artwork_ids": [
           "great-wave"
         ],
+        "artwork_placements": [
+          {
+            "artwork_id": "great-wave",
+            "position": {
+              "x": 0.0,
+              "y": 1.6,
+              "z": 66.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          }
+        ],
         "style": {
           "wall_color": "#1A2634",
           "floor": "tatami",
           "lighting": "soft_paper",
           "ambience": "zen"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 20
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 60
         }
       },
       {
@@ -72,11 +253,47 @@
           "liberty-leading",
           "wanderer-fog"
         ],
+        "artwork_placements": [
+          {
+            "artwork_id": "liberty-leading",
+            "position": {
+              "x": -5.25,
+              "y": 1.6,
+              "z": 86.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          },
+          {
+            "artwork_id": "wanderer-fog",
+            "position": {
+              "x": -5.25,
+              "y": 1.6,
+              "z": 86.0
+            },
+            "rotationY": 0,
+            "side": "right"
+          }
+        ],
         "style": {
           "wall_color": "#3A2D2D",
           "floor": "dark_wood",
           "lighting": "moody",
           "ambience": "dramatic"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 20
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 80
         }
       },
       {
@@ -86,11 +303,37 @@
         "artwork_ids": [
           "american-gothic"
         ],
+        "artwork_placements": [
+          {
+            "artwork_id": "american-gothic",
+            "position": {
+              "x": 0.0,
+              "y": 1.6,
+              "z": 106.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          }
+        ],
         "style": {
           "wall_color": "#C4B89D",
           "floor": "pine",
           "lighting": "midwestern",
           "ambience": "pastoral"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 20
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 100
         }
       },
       {
@@ -100,11 +343,37 @@
         "artwork_ids": [
           "nighthawks"
         ],
+        "artwork_placements": [
+          {
+            "artwork_id": "nighthawks",
+            "position": {
+              "x": 0.0,
+              "y": 1.6,
+              "z": 126.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          }
+        ],
         "style": {
           "wall_color": "#2B2B2B",
           "floor": "concrete",
           "lighting": "diner_fluorescent",
           "ambience": "noir"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 20
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 120
         }
       },
       {
@@ -114,11 +383,37 @@
         "artwork_ids": [
           "kiss-klimt"
         ],
+        "artwork_placements": [
+          {
+            "artwork_id": "kiss-klimt",
+            "position": {
+              "x": 0.0,
+              "y": 1.6,
+              "z": 146.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          }
+        ],
         "style": {
           "wall_color": "#2D3B2D",
           "floor": "parquet",
           "lighting": "golden",
           "ambience": "opulent"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 20
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 140
         }
       },
       {
@@ -128,11 +423,37 @@
         "artwork_ids": [
           "persistence-memory"
         ],
+        "artwork_placements": [
+          {
+            "artwork_id": "persistence-memory",
+            "position": {
+              "x": 0.0,
+              "y": 1.6,
+              "z": 166.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          }
+        ],
         "style": {
           "wall_color": "#0F0F1A",
           "floor": "black_mirror",
           "lighting": "neon",
           "ambience": "dreamlike"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 20
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 160
         }
       },
       {
@@ -143,11 +464,47 @@
           "water-lilies",
           "luncheon-boating"
         ],
+        "artwork_placements": [
+          {
+            "artwork_id": "water-lilies",
+            "position": {
+              "x": -5.25,
+              "y": 1.6,
+              "z": 186.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          },
+          {
+            "artwork_id": "luncheon-boating",
+            "position": {
+              "x": -5.25,
+              "y": 1.6,
+              "z": 186.0
+            },
+            "rotationY": 0,
+            "side": "right"
+          }
+        ],
         "style": {
           "wall_color": "#E8E0D0",
           "floor": "light_oak",
           "lighting": "natural",
           "ambience": "airy"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 20
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 180
         }
       },
       {
@@ -157,11 +514,37 @@
         "artwork_ids": [
           "scream"
         ],
+        "artwork_placements": [
+          {
+            "artwork_id": "scream",
+            "position": {
+              "x": 0.0,
+              "y": 1.6,
+              "z": 206.0
+            },
+            "rotationY": 0,
+            "side": "left"
+          }
+        ],
         "style": {
           "wall_color": "#1A1A2E",
           "floor": "concrete",
           "lighting": "spotlit",
           "ambience": "intense"
+        },
+        "dimensions": {
+          "width": 30,
+          "height": 5,
+          "depth": 20
+        },
+        "doorway": {
+          "width": 4,
+          "height": 3.5
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 200
         }
       }
     ],
@@ -607,18 +990,18 @@
     {
       "step": "curator_select",
       "detail": 18,
-      "timestamp": "2026-05-13T13:18:44.316871"
+      "timestamp": "2026-05-13T13:47:30.840069"
     },
     {
       "step": "compliance_and_enrich",
       "detail": 18,
-      "timestamp": "2026-05-13T13:18:44.316871"
+      "timestamp": "2026-05-13T13:47:30.842784"
     },
     {
       "step": "designer_arrange",
-      "detail": 11,
-      "timestamp": "2026-05-13T13:18:44.316871"
+      "detail": 12,
+      "timestamp": "2026-05-13T13:47:30.844540"
     }
   ],
-  "generated_at": "2026-05-13T13:18:44.316871"
+  "generated_at": "2026-05-13T13:47:30.844540"
 }

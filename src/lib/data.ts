@@ -17,20 +17,29 @@ export interface Artwork {
   audio_narration: string;
   tags: string[];
   highlight: boolean;
-  room_id?: string;
-  compliance?: Record<string, unknown>;
+}
+
+export interface GalleryLayoutItem {
+  id: string;
+  name: string;
+  movement: string;
+  artwork_ids: string[];
+  artwork_placements?: {
+    artwork_id: string;
+    position: { x: number; y: number; z: number };
+    rotationY: number;
+    side: string;
+  }[];
+  style: Record<string, string>;
+  dimensions?: { width: number; height: number; depth: number };
+  doorway?: { width: number; height: number };
+  position?: { x: number; y: number; z: number };
 }
 
 export interface Gallery {
   name: string;
   rooms: number;
-  layout: {
-    id: string;
-    name: string;
-    movement: string;
-    artwork_ids: string[];
-    style: Record<string, string>;
-  }[];
+  layout: GalleryLayoutItem[];
   featured_artwork: string;
 }
 
