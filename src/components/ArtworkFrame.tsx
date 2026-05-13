@@ -16,6 +16,9 @@ export default function ArtworkFrame({
   hovered: boolean;
   artworkId: string;
 }) {
+  const imgUrl = artwork.image_url_3d || artwork.image_url;
+  if (!imgUrl) return null;
+
   const aspect = (() => {
     try {
       const dims = (artwork.dimensions || "1x1").split("x").map((s: string) => parseFloat(s.trim()));
@@ -45,12 +48,21 @@ export default function ArtworkFrame({
       </mesh>
 
       {/* Painting image */}
-      <Image
-        url={artwork.image_url_3d}
-        position={[0, 0, 0.02]}
-        scale={[frameW, frameH]}
-        transparent
-      />
+      <group>
+        {/* Fallback colored panel while image loads */}
+        <mesh position={[0, 0, 0.01]}>
+          <planeGeometry args={[frameW, frameH]} />
+          <meshStandardMaterial color="#1a1a1a" />
+        </mesh>
+        {imgUrl && (
+          <Image
+            url={imgUrl}
+            position={[0, 0, 0.02]}
+            scale={[frameW, frameH]}
+            transparent
+          />
+        )}
+      </group>
     </group>
   );
 }

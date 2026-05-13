@@ -3,3 +3,5 @@ node_modules
 *.pyc
 __pycache__
 .vercel
+dev_out.log
+dev_err.log
