@@ -10,6 +10,7 @@ import MuseumHall from "./MuseumHall";
 import Player from "./Player";
 import ArtworkFrame from "./ArtworkFrame";
 import ArtworkModal from "./ArtworkModal";
+import FrameErrorBoundary from "./FrameErrorBoundary";
 
 const RAY_DISTANCE = 3;
 const TEXTURE_RADIUS = 30;
@@ -99,14 +100,15 @@ function MuseumContent() {
           return Math.sqrt(dx * dx + dz * dz) < TEXTURE_RADIUS;
         })
         .map((art: any) => (
-          <ArtworkFrame
-            key={art.source_id || art.id}
-            artwork={art}
-            position={[art.position_x || 0, art.position_y || 1.6, art.position_z || 0]}
-            rotation={[0, art.rotation_y || 0, 0]}
-            hovered={hoveredArt?.artworkId === (art.source_id || art.id)}
-            artworkId={art.source_id || art.id}
-          />
+          <FrameErrorBoundary key={art.source_id || art.id}>
+            <ArtworkFrame
+              artwork={art}
+              position={[art.position_x || 0, art.position_y || 1.6, art.position_z || 0]}
+              rotation={[0, art.rotation_y || 0, 0]}
+              hovered={hoveredArt?.artworkId === (art.source_id || art.id)}
+              artworkId={art.source_id || art.id}
+            />
+          </FrameErrorBoundary>
         ))}
 
       {hoveredArt && !selectedArt && (

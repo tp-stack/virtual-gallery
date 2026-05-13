@@ -1,36 +1,7 @@
 "use client";
 
-import { Suspense, useRef } from "react";
-import { useLoader } from "@react-three/fiber";
+import { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
-
-function PaintingTexture({ url, frameW, frameH }: { url: string; frameW: number; frameH: number }) {
-  try {
-    const texture = useLoader(THREE.TextureLoader, url);
-    return (
-      <mesh position={[0, 0, 0.02]}>
-        <planeGeometry args={[frameW, frameH]} />
-        <meshStandardMaterial map={texture} toneMapped={false} />
-      </mesh>
-    );
-  } catch {
-    return (
-      <mesh position={[0, 0, 0.02]}>
-        <planeGeometry args={[frameW, frameH]} />
-        <meshStandardMaterial color="#333" />
-      </mesh>
-    );
-  }
-}
-
-function PaintingFallback({ frameW, frameH }: { frameW: number; frameH: number }) {
-  return (
-    <mesh position={[0, 0, 0.02]}>
-      <planeGeometry args={[frameW, frameH]} />
-      <meshStandardMaterial color="#1a1a1a" />
-    </mesh>
-  );
-}
 
 export default function ArtworkFrame({
   artwork,
@@ -45,8 +16,35 @@ export default function ArtworkFrame({
   hovered: boolean;
   artworkId: string;
 }) {
+  const [texture, setTexture] = useState<THREE.Texture | null>(null);
+  const [errored, setErrored] = useState(false);
+  const mountedRef = useRef(true);
+
   const imgUrl = artwork.image_url_3d || artwork.image_url;
-  if (!imgUrl) return null;
+
+  useEffect(() => {
+    if (!imgUrl) return;
+    mountedRef.current = true;
+    setErrored(false);
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      if (!mountedRef.current) return;
+      const tex = new THREE.Texture(img);
+      tex.needsUpdate = true;
+      setTexture(tex);
+    };
+    img.onerror = () => {
+      if (!mountedRef.current) return;
+      setErrored(true);
+    };
+    img.src = imgUrl;
+
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [imgUrl]);
 
   const aspect = (() => {
     try {
@@ -59,9 +57,11 @@ export default function ArtworkFrame({
   const frameW = 1.8;
   const frameH = frameW / aspect;
 
+  const hasTexture = texture && !errored;
+
   return (
     <group position={position} rotation={rotation}>
-      {/* Backboard with userData for raycasting */}
+      {/* Backboard */}
       <mesh position={[0, 0, -0.05]} userData={{ artworkId, title: artwork.title }}>
         <boxGeometry args={[frameW + 0.1, frameH + 0.1, 0.1]} />
         <meshStandardMaterial color={hovered ? "#333" : "#1a1a1a"} />
@@ -73,10 +73,15 @@ export default function ArtworkFrame({
         <meshStandardMaterial color={hovered ? "#D4B96A" : "#8B7355"} metalness={0.6} roughness={0.3} />
       </mesh>
 
-      {/* Painting texture with suspense fallback */}
-      <Suspense fallback={<PaintingFallback frameW={frameW} frameH={frameH} />}>
-        <PaintingTexture url={imgUrl} frameW={frameW} frameH={frameH} />
-      </Suspense>
+      {/* Painting surface */}
+      <mesh position={[0, 0, 0.02]}>
+        <planeGeometry args={[frameW, frameH]} />
+        <meshStandardMaterial
+          color={errored ? "#2a2a2a" : "#1a1a1a"}
+          map={hasTexture ? texture : undefined}
+          toneMapped={false}
+        />
+      </mesh>
     </group>
   );
 }
