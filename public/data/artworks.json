@@ -1,0 +1,624 @@
+{
+  "gallery": {
+    "name": "The Public Domain Masterpiece Gallery",
+    "rooms": 11,
+    "layout": [
+      {
+        "id": "room-1",
+        "name": "The Renaissance Wing",
+        "movement": "Renaissance",
+        "artwork_ids": [
+          "mona-lisa",
+          "birth-venus",
+          "sistine-chapel"
+        ],
+        "style": {
+          "wall_color": "#F5F0E8",
+          "floor": "marble",
+          "lighting": "warm",
+          "ambience": "classical"
+        }
+      },
+      {
+        "id": "room-2",
+        "name": "The Post-Impressionism Wing",
+        "movement": "Post-Impressionism",
+        "artwork_ids": [
+          "starry-night",
+          "sunday-la-grande-jatte"
+        ],
+        "style": {
+          "wall_color": "#D4C5A9",
+          "floor": "stone",
+          "lighting": "warm",
+          "ambience": "contemplative"
+        }
+      },
+      {
+        "id": "room-3",
+        "name": "The Baroque Wing",
+        "movement": "Baroque",
+        "artwork_ids": [
+          "girl-pearl-earring",
+          "night-watch",
+          "milkmaid"
+        ],
+        "style": {
+          "wall_color": "#2C1810",
+          "floor": "dark_wood",
+          "lighting": "dramatic",
+          "ambience": "theatrical"
+        }
+      },
+      {
+        "id": "room-4",
+        "name": "The Ukiyo-e Wing",
+        "movement": "Ukiyo-e",
+        "artwork_ids": [
+          "great-wave"
+        ],
+        "style": {
+          "wall_color": "#1A2634",
+          "floor": "tatami",
+          "lighting": "soft_paper",
+          "ambience": "zen"
+        }
+      },
+      {
+        "id": "room-5",
+        "name": "The Romanticism Wing",
+        "movement": "Romanticism",
+        "artwork_ids": [
+          "liberty-leading",
+          "wanderer-fog"
+        ],
+        "style": {
+          "wall_color": "#3A2D2D",
+          "floor": "dark_wood",
+          "lighting": "moody",
+          "ambience": "dramatic"
+        }
+      },
+      {
+        "id": "room-6",
+        "name": "The Regionalism Wing",
+        "movement": "Regionalism",
+        "artwork_ids": [
+          "american-gothic"
+        ],
+        "style": {
+          "wall_color": "#C4B89D",
+          "floor": "pine",
+          "lighting": "midwestern",
+          "ambience": "pastoral"
+        }
+      },
+      {
+        "id": "room-7",
+        "name": "The American Realism Wing",
+        "movement": "American Realism",
+        "artwork_ids": [
+          "nighthawks"
+        ],
+        "style": {
+          "wall_color": "#2B2B2B",
+          "floor": "concrete",
+          "lighting": "diner_fluorescent",
+          "ambience": "noir"
+        }
+      },
+      {
+        "id": "room-8",
+        "name": "The Art Nouveau Wing",
+        "movement": "Art Nouveau",
+        "artwork_ids": [
+          "kiss-klimt"
+        ],
+        "style": {
+          "wall_color": "#2D3B2D",
+          "floor": "parquet",
+          "lighting": "golden",
+          "ambience": "opulent"
+        }
+      },
+      {
+        "id": "room-9",
+        "name": "The Surrealism Wing",
+        "movement": "Surrealism",
+        "artwork_ids": [
+          "persistence-memory"
+        ],
+        "style": {
+          "wall_color": "#0F0F1A",
+          "floor": "black_mirror",
+          "lighting": "neon",
+          "ambience": "dreamlike"
+        }
+      },
+      {
+        "id": "room-10",
+        "name": "The Impressionism Wing",
+        "movement": "Impressionism",
+        "artwork_ids": [
+          "water-lilies",
+          "luncheon-boating"
+        ],
+        "style": {
+          "wall_color": "#E8E0D0",
+          "floor": "light_oak",
+          "lighting": "natural",
+          "ambience": "airy"
+        }
+      },
+      {
+        "id": "room-11",
+        "name": "The Expressionism Wing",
+        "movement": "Expressionism",
+        "artwork_ids": [
+          "scream"
+        ],
+        "style": {
+          "wall_color": "#1A1A2E",
+          "floor": "concrete",
+          "lighting": "spotlit",
+          "ambience": "intense"
+        }
+      }
+    ],
+    "featured_artwork": "mona-lisa"
+  },
+  "artworks": [
+    {
+      "id": "mona-lisa",
+      "title": "Mona Lisa (La Gioconda)",
+      "artist": "Leonardo da Vinci",
+      "year": 1503,
+      "movement": "Renaissance",
+      "origin": "Italy",
+      "medium": "Oil on poplar panel",
+      "museum": "Louvre, Paris",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
+      "dimensions": "77 cm x 53 cm",
+      "description": "The world's most famous portrait, celebrated for her enigmatic smile.",
+      "description_long": "Leonardo da Vinci's Mona Lisa is arguably the most recognized painting in the world. Painted between 1503 and 1519, this portrait of Lisa Gherardini showcases Leonardo's revolutionary sfumato technique — layers of translucent glazes creating soft transitions between light and shadow. The subject's mysterious smile has fascinated viewers for over five centuries.",
+      "audio_narration": "Before you stands the Mona Lisa, painted by Leonardo da Vinci around 1503. Notice how her smile seems to change as you move — this is the magic of sfumato. The painting measures just 77 by 53 centimeters, yet its cultural impact is immeasurable.",
+      "tags": [
+        "portrait",
+        "Renaissance",
+        "sfumato",
+        "Italian"
+      ],
+      "highlight": true,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "starry-night",
+      "title": "The Starry Night",
+      "artist": "Vincent van Gogh",
+      "year": 1889,
+      "movement": "Post-Impressionism",
+      "origin": "France",
+      "medium": "Oil on canvas",
+      "museum": "MoMA, New York",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+      "dimensions": "73.7 cm x 92.1 cm",
+      "description": "Van Gogh's swirling nocturnal vision, painted from an asylum window.",
+      "description_long": "Painted in June 1889, The Starry Night depicts the view from Van Gogh's east-facing window at the Saint-Paul-de-Mausole asylum in Saint-Remy-de-Provence. The painting captures the night sky with tumultuous swirls of blue and yellow, a village below, and a towering cypress tree reaching toward the heavens.",
+      "audio_narration": "This is Van Gogh's Starry Night, painted in 1889 while he was a patient at an asylum in southern France. Look at the sky — those spiraling waves of blue and gold were not what Van Gogh literally saw, but what he felt.",
+      "tags": [
+        "landscape",
+        "Post-Impressionism",
+        "night sky",
+        "swirling"
+      ],
+      "highlight": true,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "girl-pearl-earring",
+      "title": "Girl with a Pearl Earring",
+      "artist": "Johannes Vermeer",
+      "year": 1665,
+      "movement": "Baroque",
+      "origin": "Netherlands",
+      "medium": "Oil on canvas",
+      "museum": "Mauritshuis, The Hague",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg/800px-Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg",
+      "dimensions": "44.5 cm x 39 cm",
+      "description": "Vermeer's 'Mona Lisa of the North' — a luminous tronie of mystery.",
+      "description_long": "Girl with a Pearl Earring is one of Vermeer's most iconic works, often called the 'Mona Lisa of the North.' Painted around 1665, it is not a portrait but a tronie — a Dutch Golden Age study of expression and costume. The girl's exotic turban, luminous pearl, and turned gaze create an unforgettable image of intimate beauty.",
+      "audio_narration": "This is Vermeer's Girl with a Pearl Earring, painted around 1665. Notice how she seems to look directly at you — this captured moment gives the painting its incredible intimacy.",
+      "tags": [
+        "tronie",
+        "Baroque",
+        "pearl",
+        "Dutch"
+      ],
+      "highlight": true,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "great-wave",
+      "title": "The Great Wave off Kanagawa",
+      "artist": "Katsushika Hokusai",
+      "year": 1831,
+      "movement": "Ukiyo-e",
+      "origin": "Japan",
+      "medium": "Woodblock print",
+      "museum": "Met Museum, New York",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1280px-Tsunami_by_hokusai_19th_century.jpg",
+      "dimensions": "25.7 cm x 37.8 cm",
+      "description": "Hokusai's iconic woodblock print of nature's terrible power.",
+      "description_long": "The Great Wave off Kanagawa is the most famous work of Japanese art, created by Katsushika Hokusai around 1831 as part of his series Thirty-six Views of Mount Fuji. The print depicts enormous waves threatening boats off the coast of Kanagawa, with Mount Fuji small in the background.",
+      "audio_narration": "Hokusai's Great Wave is perhaps the most reproduced image in all of Japanese art. Notice Mount Fuji in the background — tiny and serene, dwarfed by the towering wave. The Prussian blue pigment was new to Japan, giving the work its distinctive color.",
+      "tags": [
+        "ukiyo-e",
+        "woodblock",
+        "wave",
+        "Japanese"
+      ],
+      "highlight": true,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "night-watch",
+      "title": "The Night Watch",
+      "artist": "Rembrandt van Rijn",
+      "year": 1642,
+      "movement": "Baroque",
+      "origin": "Netherlands",
+      "medium": "Oil on canvas",
+      "museum": "Rijksmuseum, Amsterdam",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/The_Night_Watch_-_HD.jpg/1280px-The_Night_Watch_-_HD.jpg",
+      "dimensions": "363 cm x 437 cm",
+      "description": "A masterpiece of Baroque by Rembrandt van Rijn.",
+      "description_long": "The Night Watch, created by Rembrandt van Rijn in 1642, is a seminal work of the Baroque movement. Painted in Oil on canvas, this work is housed at Rijksmuseum, Amsterdam.",
+      "audio_narration": "This is The Night Watch by Rembrandt van Rijn, created in 1642. A notable example of Baroque, this Oil on canvas work can be found at Rijksmuseum, Amsterdam.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "birth-venus",
+      "title": "The Birth of Venus",
+      "artist": "Sandro Botticelli",
+      "year": 1485,
+      "movement": "Renaissance",
+      "origin": "Italy",
+      "medium": "Tempera on canvas",
+      "museum": "Uffizi Gallery, Florence",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project.jpg/1280px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project.jpg",
+      "dimensions": "172.5 cm x 278.9 cm",
+      "description": "A masterpiece of Renaissance by Sandro Botticelli.",
+      "description_long": "The Birth of Venus, created by Sandro Botticelli in 1485, is a seminal work of the Renaissance movement. Painted in Tempera on canvas, this work is housed at Uffizi Gallery, Florence.",
+      "audio_narration": "This is The Birth of Venus by Sandro Botticelli, created in 1485. A notable example of Renaissance, this Tempera on canvas work can be found at Uffizi Gallery, Florence.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "liberty-leading",
+      "title": "Liberty Leading the People",
+      "artist": "Eugene Delacroix",
+      "year": 1830,
+      "movement": "Romanticism",
+      "origin": "France",
+      "medium": "Oil on canvas",
+      "museum": "Louvre, Paris",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Eug%C3%A8ne_Delacroix_-_La_libert%C3%A9_guidant_le_peuple.jpg/1280px-Eug%C3%A8ne_Delacroix_-_La_libert%C3%A9_guidant_le_peuple.jpg",
+      "dimensions": "260 cm x 325 cm",
+      "description": "A masterpiece of Romanticism by Eugene Delacroix.",
+      "description_long": "Liberty Leading the People, created by Eugene Delacroix in 1830, is a seminal work of the Romanticism movement. Painted in Oil on canvas, this work is housed at Louvre, Paris.",
+      "audio_narration": "This is Liberty Leading the People by Eugene Delacroix, created in 1830. A notable example of Romanticism, this Oil on canvas work can be found at Louvre, Paris.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "wanderer-fog",
+      "title": "Wanderer above the Sea of Fog",
+      "artist": "Caspar David Friedrich",
+      "year": 1818,
+      "movement": "Romanticism",
+      "origin": "Germany",
+      "medium": "Oil on canvas",
+      "museum": "Kunsthalle Hamburg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg/800px-Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg",
+      "dimensions": "94.8 cm x 74.8 cm",
+      "description": "A masterpiece of Romanticism by Caspar David Friedrich.",
+      "description_long": "Wanderer above the Sea of Fog, created by Caspar David Friedrich in 1818, is a seminal work of the Romanticism movement. Painted in Oil on canvas, this work is housed at Kunsthalle Hamburg.",
+      "audio_narration": "This is Wanderer above the Sea of Fog by Caspar David Friedrich, created in 1818. A notable example of Romanticism, this Oil on canvas work can be found at Kunsthalle Hamburg.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "american-gothic",
+      "title": "American Gothic",
+      "artist": "Grant Wood",
+      "year": 1930,
+      "movement": "Regionalism",
+      "origin": "United States",
+      "medium": "Oil on beaverboard",
+      "museum": "Art Institute of Chicago",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/American_Gothic.jpg/800px-American_Gothic.jpg",
+      "dimensions": "78 cm x 65.3 cm",
+      "description": "A masterpiece of Regionalism by Grant Wood.",
+      "description_long": "American Gothic, created by Grant Wood in 1930, is a seminal work of the Regionalism movement. Painted in Oil on beaverboard, this work is housed at Art Institute of Chicago.",
+      "audio_narration": "This is American Gothic by Grant Wood, created in 1930. A notable example of Regionalism, this Oil on beaverboard work can be found at Art Institute of Chicago.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "sunday-la-grande-jatte",
+      "title": "A Sunday on La Grande Jatte",
+      "artist": "Georges Seurat",
+      "year": 1886,
+      "movement": "Post-Impressionism",
+      "origin": "France",
+      "medium": "Oil on canvas",
+      "museum": "Art Institute of Chicago",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884%2C_Oil_on_canvas.jpg/1280px-A_Sunday_on_La_Grande_Jatte%2C_Georges_Seurat%2C_1884%2C_Oil_on_canvas.jpg",
+      "dimensions": "207.6 cm x 308 cm",
+      "description": "A masterpiece of Post-Impressionism by Georges Seurat.",
+      "description_long": "A Sunday on La Grande Jatte, created by Georges Seurat in 1886, is a seminal work of the Post-Impressionism movement. Painted in Oil on canvas, this work is housed at Art Institute of Chicago.",
+      "audio_narration": "This is A Sunday on La Grande Jatte by Georges Seurat, created in 1886. A notable example of Post-Impressionism, this Oil on canvas work can be found at Art Institute of Chicago.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "nighthawks",
+      "title": "Nighthawks",
+      "artist": "Edward Hopper",
+      "year": 1942,
+      "movement": "American Realism",
+      "origin": "United States",
+      "medium": "Oil on canvas",
+      "museum": "Art Institute of Chicago",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Nighthawks_%281942%29_by_Edward_Hopper.jpg/1280px-Nighthawks_%281942%29_by_Edward_Hopper.jpg",
+      "dimensions": "84.1 cm x 152.4 cm",
+      "description": "A masterpiece of American Realism by Edward Hopper.",
+      "description_long": "Nighthawks, created by Edward Hopper in 1942, is a seminal work of the American Realism movement. Painted in Oil on canvas, this work is housed at Art Institute of Chicago.",
+      "audio_narration": "This is Nighthawks by Edward Hopper, created in 1942. A notable example of American Realism, this Oil on canvas work can be found at Art Institute of Chicago.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "kiss-klimt",
+      "title": "The Kiss",
+      "artist": "Gustav Klimt",
+      "year": 1908,
+      "movement": "Art Nouveau",
+      "origin": "Austria",
+      "medium": "Oil and gold leaf on canvas",
+      "museum": "Belvedere, Vienna",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/800px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg",
+      "dimensions": "180 cm x 180 cm",
+      "description": "A masterpiece of Art Nouveau by Gustav Klimt.",
+      "description_long": "The Kiss, created by Gustav Klimt in 1908, is a seminal work of the Art Nouveau movement. Painted in Oil and gold leaf on canvas, this work is housed at Belvedere, Vienna.",
+      "audio_narration": "This is The Kiss by Gustav Klimt, created in 1908. A notable example of Art Nouveau, this Oil and gold leaf on canvas work can be found at Belvedere, Vienna.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "persistence-memory",
+      "title": "The Persistence of Memory",
+      "artist": "Salvador Dali",
+      "year": 1931,
+      "movement": "Surrealism",
+      "origin": "Spain",
+      "medium": "Oil on canvas",
+      "museum": "MoMA, New York",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/The_Persistence_of_Memory.jpg/800px-The_Persistence_of_Memory.jpg",
+      "dimensions": "24.1 cm x 33 cm",
+      "description": "A masterpiece of Surrealism by Salvador Dali.",
+      "description_long": "The Persistence of Memory, created by Salvador Dali in 1931, is a seminal work of the Surrealism movement. Painted in Oil on canvas, this work is housed at MoMA, New York.",
+      "audio_narration": "This is The Persistence of Memory by Salvador Dali, created in 1931. A notable example of Surrealism, this Oil on canvas work can be found at MoMA, New York.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "milkmaid",
+      "title": "The Milkmaid",
+      "artist": "Johannes Vermeer",
+      "year": 1660,
+      "movement": "Baroque",
+      "origin": "Netherlands",
+      "medium": "Oil on canvas",
+      "museum": "Rijksmuseum, Amsterdam",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/The_milkmaid_%28Het_melkmeisje%29_-_Johannes_Vermeer_-_Google_Art_Project.jpg/800px-The_milkmaid_%28Het_melkmeisje%29_-_Johannes_Vermeer_-_Google_Art_Project.jpg",
+      "dimensions": "45.5 cm x 41 cm",
+      "description": "A masterpiece of Baroque by Johannes Vermeer.",
+      "description_long": "The Milkmaid, created by Johannes Vermeer in 1660, is a seminal work of the Baroque movement. Painted in Oil on canvas, this work is housed at Rijksmuseum, Amsterdam.",
+      "audio_narration": "This is The Milkmaid by Johannes Vermeer, created in 1660. A notable example of Baroque, this Oil on canvas work can be found at Rijksmuseum, Amsterdam.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "sistine-chapel",
+      "title": "The Creation of Adam (Sistine Chapel ceiling)",
+      "artist": "Michelangelo",
+      "year": 1512,
+      "movement": "Renaissance",
+      "origin": "Italy",
+      "medium": "Fresco",
+      "museum": "Sistine Chapel, Vatican",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg/1280px-Michelangelo_-_Creation_of_Adam_%28cropped%29.jpg",
+      "dimensions": "280 cm x 570 cm",
+      "description": "A masterpiece of Renaissance by Michelangelo.",
+      "description_long": "The Creation of Adam (Sistine Chapel ceiling), created by Michelangelo in 1512, is a seminal work of the Renaissance movement. Painted in Fresco, this work is housed at Sistine Chapel, Vatican.",
+      "audio_narration": "This is The Creation of Adam (Sistine Chapel ceiling) by Michelangelo, created in 1512. A notable example of Renaissance, this Fresco work can be found at Sistine Chapel, Vatican.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "water-lilies",
+      "title": "Water Lilies",
+      "artist": "Claude Monet",
+      "year": 1906,
+      "movement": "Impressionism",
+      "origin": "France",
+      "medium": "Oil on canvas",
+      "museum": "Art Institute of Chicago",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Claude_Monet_-_Water_Lilies_%281906%29.JPG/800px-Claude_Monet_-_Water_Lilies_%281906%29.JPG",
+      "dimensions": "89.9 cm x 94.1 cm",
+      "description": "A masterpiece of Impressionism by Claude Monet.",
+      "description_long": "Water Lilies, created by Claude Monet in 1906, is a seminal work of the Impressionism movement. Painted in Oil on canvas, this work is housed at Art Institute of Chicago.",
+      "audio_narration": "This is Water Lilies by Claude Monet, created in 1906. A notable example of Impressionism, this Oil on canvas work can be found at Art Institute of Chicago.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "scream",
+      "title": "The Scream",
+      "artist": "Edvard Munch",
+      "year": 1893,
+      "movement": "Expressionism",
+      "origin": "Norway",
+      "medium": "Tempera and crayon on cardboard",
+      "museum": "National Gallery, Oslo",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg/800px-Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg",
+      "dimensions": "91 cm x 73.5 cm",
+      "description": "A masterpiece of Expressionism by Edvard Munch.",
+      "description_long": "The Scream, created by Edvard Munch in 1893, is a seminal work of the Expressionism movement. Painted in Tempera and crayon on cardboard, this work is housed at National Gallery, Oslo.",
+      "audio_narration": "This is The Scream by Edvard Munch, created in 1893. A notable example of Expressionism, this Tempera and crayon on cardboard work can be found at National Gallery, Oslo.",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    },
+    {
+      "id": "luncheon-boating",
+      "title": "Luncheon of the Boating Party",
+      "artist": "Pierre-Auguste Renoir",
+      "year": 1881,
+      "movement": "Impressionism",
+      "origin": "France",
+      "medium": "Oil on canvas",
+      "museum": "Phillips Collection, Washington D.C.",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Luncheon_of_the_Boating_Party_by_Pierre-Auguste_Renoir.jpg/1280px-Luncheon_of_the_Boating_Party_by_Pierre-Auguste_Renoir.jpg",
+      "dimensions": "129.9 cm x 172.7 cm",
+      "description": "A masterpiece of Impressionism by Pierre-Auguste Renoir.",
+      "description_long": "Luncheon of the Boating Party, created by Pierre-Auguste Renoir in 1881, is a seminal work of the Impressionism movement. Painted in Oil on canvas, this work is housed at Phillips Collection, Washington D.C..",
+      "audio_narration": "This is Luncheon of the Boating Party by Pierre-Auguste Renoir, created in 1881. A notable example of Impressionism, this Oil on canvas work can be found at Phillips Collection, Washington D.C..",
+      "tags": [],
+      "highlight": false,
+      "compliance": {
+        "public_domain": true,
+        "reason": "Whitelisted pre-verified public domain",
+        "jurisdiction": "global",
+        "confidence": 1.0
+      }
+    }
+  ],
+  "pipeline_log": [
+    {
+      "step": "curator_select",
+      "detail": 18,
+      "timestamp": "2026-05-13T13:18:44.316871"
+    },
+    {
+      "step": "compliance_and_enrich",
+      "detail": 18,
+      "timestamp": "2026-05-13T13:18:44.316871"
+    },
+    {
+      "step": "designer_arrange",
+      "detail": 11,
+      "timestamp": "2026-05-13T13:18:44.316871"
+    }
+  ],
+  "generated_at": "2026-05-13T13:18:44.316871"
+}
