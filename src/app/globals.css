@@ -1,29 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg-primary: #0A0A0A;
-  --gold: #C9A84C;
-  --text-primary: #F0ECE3;
+  --bg-primary: #050505;
+  --bg-secondary: #0D0D0D;
+  --bg-surface: #161616;
+  --border: #232323;
+  --text-primary: #F5F2EA;
+  --text-secondary: #B8B2A4;
+  --gold: #C8A96A;
+  --white: #E6E6E6;
+  --bluegray: #8FA3B8;
 }
 
 * { box-sizing: border-box; }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.6;
   overflow-x: hidden;
 }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #141414; }
-::-webkit-scrollbar-thumb { background: #3A3A3A; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #5A5A5A; }
+::selection {
+  background: rgba(200, 169, 106, 0.2);
+  color: var(--text-primary);
+}
 
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* Masonry grid */
 .masonry {
   columns: 3;
   column-gap: 1.5rem;
@@ -35,13 +55,15 @@ body {
 @media (max-width: 1024px) { .masonry { columns: 2; } }
 @media (max-width: 640px)  { .masonry { columns: 1; } }
 
+/* Artwork hover zoom */
 .artwork-img {
-  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .artwork-card:hover .artwork-img {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
+/* Gold line divider */
 @keyframes goldExpand {
   from { width: 0; }
   to   { width: 100%; }
@@ -49,22 +71,73 @@ body {
 .gold-line {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
-  animation: goldExpand 1.5s ease-out forwards;
+  animation: goldExpand 1.8s ease-out forwards;
 }
 
+/* Fade up */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(30px); }
+  from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 .fade-up {
   animation: fadeUp 0.8s ease-out forwards;
 }
 
-.gold-glow {
-  box-shadow: 0 0 30px rgba(201, 168, 76, 0.15), 0 0 60px rgba(201, 168, 76, 0.05);
+/* Slow fade in */
+@keyframes slowFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.slow-fade {
+  animation: slowFade 1.2s ease-out forwards;
 }
 
+/* Soft glow */
+.museum-glow {
+  box-shadow: 0 0 60px rgba(200, 169, 106, 0.06), 0 0 120px rgba(200, 169, 106, 0.03);
+}
+
+/* Glass surface */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Museum plaque card */
+.plaque {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: border-color 0.5s ease, box-shadow 0.5s ease;
+}
+.plaque:hover {
+  border-color: rgba(200, 169, 106, 0.25);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Label style */
+.label {
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* Slow motion */
+@keyframes slowPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.slow-pulse {
+  animation: slowPulse 3s ease-in-out infinite;
+}
+
+/* Modal backdrop */
 .modal-backdrop {
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  background: rgba(5, 5, 5, 0.85);
 }

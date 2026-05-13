@@ -19,24 +19,27 @@ export default function GalleryClient() {
   const [movements, setMovements] = useState<{ movement: string; count: number }[]>([]);
   const pageRef = useRef(1);
 
-  const fetchPage = useCallback(async (pageNum: number, append: boolean) => {
-    setLoading(true);
-    const params = new URLSearchParams({ page: String(pageNum), limit: "50" });
-    if (activeMovement) params.set("movement", activeMovement);
-    if (searchQuery) params.set("search", searchQuery);
+  const fetchPage = useCallback(
+    async (pageNum: number, append: boolean) => {
+      setLoading(true);
+      const params = new URLSearchParams({ page: String(pageNum), limit: "50" });
+      if (activeMovement) params.set("movement", activeMovement);
+      if (searchQuery) params.set("search", searchQuery);
 
-    const res = await fetch(`/api/artworks?${params}`);
-    const json = await res.json();
+      const res = await fetch(`/api/artworks?${params}`);
+      const json = await res.json();
 
-    if (append) {
-      setArtworks((prev) => [...prev, ...(json.data || [])]);
-    } else {
-      setArtworks(json.data || []);
-    }
-    setTotal(json.total || 0);
-    setHasMore(json.data?.length === 50);
-    setLoading(false);
-  }, [activeMovement, searchQuery]);
+      if (append) {
+        setArtworks((prev) => [...prev, ...(json.data || [])]);
+      } else {
+        setArtworks(json.data || []);
+      }
+      setTotal(json.total || 0);
+      setHasMore(json.data?.length === 50);
+      setLoading(false);
+    },
+    [activeMovement, searchQuery]
+  );
 
   useEffect(() => {
     pageRef.current = 1;
@@ -63,9 +66,9 @@ export default function GalleryClient() {
   }, []);
 
   const columnCount = 4;
-  const columnWidth = 280;
-  const rowHeight = 220;
-  const height = typeof window !== "undefined" ? window.innerHeight - 200 : 800;
+  const columnWidth = 310;
+  const rowHeight = 280;
+  const height = typeof window !== "undefined" ? window.innerHeight - 250 : 800;
 
   const Cell = ({ columnIndex, rowIndex, style }: any) => {
     const index = rowIndex * columnCount + columnIndex;
@@ -73,31 +76,48 @@ export default function GalleryClient() {
     const art = artworks[index];
     return (
       <div style={style}>
-        <ArtworkCard artwork={art} index={index} viewMode={viewMode} onClick={() => setSelected(art)} />
+        <ArtworkCard
+          artwork={art}
+          index={index}
+          viewMode={viewMode}
+          onClick={() => setSelected(art)}
+        />
       </div>
     );
   };
 
   const rowCount = Math.ceil(Math.max(artworks.length, 1) / columnCount);
 
-  const handleItemsRendered = useCallback(({ visibleRowStopIndex }: any) => {
-    const lastVisibleItem = (visibleRowStopIndex + 1) * columnCount;
-    if (lastVisibleItem >= artworks.length - columnCount && hasMore && !loading) {
-      const nextPage = pageRef.current + 1;
-      pageRef.current = nextPage;
-      fetchPage(nextPage, true);
-    }
-  }, [artworks.length, hasMore, loading, fetchPage]);
+  const handleItemsRendered = useCallback(
+    ({ visibleRowStopIndex }: any) => {
+      const lastVisibleItem = (visibleRowStopIndex + 1) * columnCount;
+      if (
+        lastVisibleItem >= artworks.length - columnCount &&
+        hasMore &&
+        !loading
+      ) {
+        pageRef.current += 1;
+        fetchPage(pageRef.current, true);
+      }
+    },
+    [artworks.length, hasMore, loading, fetchPage]
+  );
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-6 max-w-7xl mx-auto">
-      <div className="mb-12">
-        <p className="text-gold-500 uppercase tracking-widest text-xs mb-3">Browse</p>
-        <h1 className="font-display text-5xl md:text-6xl text-gallery-50">The Collection</h1>
-        <p className="text-gallery-400 mt-4 text-lg">{total.toLocaleString()} artworks</p>
+    <div className="min-h-screen pt-32 pb-20 px-8 max-w-[1440px] mx-auto">
+      <div className="mb-16">
+        <p className="text-[#C8A96A] text-xs tracking-[0.16em] uppercase mb-3 font-light">
+          Browse
+        </p>
+        <h1 className="font-light text-5xl md:text-6xl text-[#F5F2EA] tracking-[-0.02em]">
+          The Collection
+        </h1>
+        <p className="text-[#B8B2A4] mt-4 text-sm font-light tracking-wide">
+          {total.toLocaleString()} works
+        </p>
       </div>
 
-      <div className="gold-line mb-8" />
+      <div className="gold-line mb-10" />
 
       <FilterBar
         movements={movements}
@@ -109,7 +129,7 @@ export default function GalleryClient() {
         onViewChange={setViewMode}
       />
 
-      <div className="mt-8">
+      <div className="mt-10">
         {artworks.length > 0 ? (
           <WindowGrid
             height={height}
@@ -123,23 +143,27 @@ export default function GalleryClient() {
             {Cell}
           </WindowGrid>
         ) : loading ? (
-          <div className="text-center py-24">
-            <div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="text-center py-32">
+            <div className="w-6 h-px bg-[#C8A96A]/40 mx-auto animate-pulse" />
           </div>
         ) : (
-          <div className="text-center py-24">
-            <p className="text-gallery-400 text-xl">No artworks found</p>
+          <div className="text-center py-32">
+            <p className="text-[#B8B2A4] text-sm tracking-wide font-light">
+              No works found
+            </p>
           </div>
         )}
         {loading && artworks.length > 0 && (
-          <div className="text-center py-4">
-            <div className="w-6 h-6 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="text-center py-6">
+            <div className="w-5 h-px bg-[#C8A96A]/30 mx-auto animate-pulse" />
           </div>
         )}
       </div>
 
       <AnimatePresence>
-        {selected && <ArtworkModal artwork={selected} onClose={() => setSelected(null)} />}
+        {selected && (
+          <ArtworkModal artwork={selected} onClose={() => setSelected(null)} />
+        )}
       </AnimatePresence>
     </div>
   );

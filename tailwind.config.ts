@@ -5,27 +5,41 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        gallery: {
-          900: "#0A0A0A",
-          800: "#141414",
-          700: "#1E1E1E",
-          600: "#2A2A2A",
-          500: "#3A3A3A",
-          400: "#5A5A5A",
-          300: "#8A8A8A",
-          200: "#B0B0B0",
-          100: "#D4D4D4",
-          50:  "#F0ECE3",
-        },
-        gold: {
-          500: "#C9A84C",
-          400: "#D4B96A",
-          300: "#E2CC8A",
+        museum: {
+          black: "#050505",
+          dark: "#0D0D0D",
+          surface: "#161616",
+          border: "#232323",
+          ivory: "#F5F2EA",
+          stone: "#B8B2A4",
+          gold: "#C8A96A",
+          white: "#E6E6E6",
+          bluegray: "#8FA3B8",
         },
       },
       fontFamily: {
-        display: ['"Playfair Display"', "serif"],
-        body: ['"Inter"', "sans-serif"],
+        sans: ['"Inter"', '"Helvetica Neue"', "Arial", "sans-serif"],
+        display: ['"Inter"', '"Helvetica Neue"', "Arial", "sans-serif"],
+      },
+      letterSpacing: {
+        wide: "0.08em",
+        wider: "0.12em",
+        widest: "0.16em",
+      },
+      fontSize: {
+        "2xs": ["0.625rem", { lineHeight: "1rem", letterSpacing: "0.08em" }],
+      },
+      borderRadius: {
+        museum: "12px",
+        "museum-lg": "20px",
+      },
+      boxShadow: {
+        museum: "0 4px 24px rgba(0,0,0,0.4)",
+        "museum-sm": "0 2px 8px rgba(0,0,0,0.3)",
+        "museum-glow": "0 0 60px rgba(200, 169, 106, 0.08)",
+      },
+      transitionDuration: {
+        museum: "500ms",
       },
     },
   },

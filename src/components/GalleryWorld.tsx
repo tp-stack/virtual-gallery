@@ -110,8 +110,13 @@ function MuseumContent() {
         ))}
 
       {hoveredArt && !selectedArt && (
-        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-10 bg-black/80 text-white px-4 py-2 rounded border border-gold-500/50 pointer-events-none text-sm">
-          [E] Inspect {hoveredArt.title?.slice(0, 50)}
+        <div className="absolute bottom-36 left-1/2 -translate-x-1/2 z-10">
+          <div className="px-5 py-2.5 bg-[#050505]/90 backdrop-blur-sm border border-[#C8A96A]/20 rounded-[12px] pointer-events-none">
+            <p className="text-[#F5F2EA] text-xs tracking-[0.06em] font-light">
+              <span className="text-[#C8A96A] text-[10px] tracking-[0.12em] uppercase mr-2">[E]</span>
+              Inspect — {hoveredArt.title?.slice(0, 50)}
+            </p>
+          </div>
         </div>
       )}
 
@@ -155,9 +160,9 @@ function InstancedFrames({ artworks }: { artworks: any[] }) {
 
 export default function GalleryWorld() {
   return (
-    <div className="w-screen h-screen relative bg-gallery-900">
+    <div className="w-screen h-screen relative bg-[#050505]">
       <Canvas shadows camera={{ fov: 75, near: 0.1, far: 500 }}>
-        <fog attach="fog" args={["#0A0A0A", 10, 300]} />
+        <fog attach="fog" args={["#050505", 10, 300]} />
         <ambientLight intensity={0.2} />
         <Suspense fallback={null}>
           <Physics gravity={[0, 0, 0]}>
@@ -168,9 +173,22 @@ export default function GalleryWorld() {
         </Suspense>
       </Canvas>
 
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/50 rounded-full pointer-events-none" />
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-gallery-300 text-sm bg-gallery-900/80 px-4 py-2 rounded pointer-events-none">
-        Click to enter | WASD to move | Mouse to look | E to inspect | ESC to pause
+      {/* Crosshair */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
+        <div className="w-8 h-8 relative">
+          <div className="absolute top-1/2 left-1/4 right-1/4 h-px bg-white/20" />
+          <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-white/20" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 border border-[#C8A96A]/60 rounded-full" />
+        </div>
+      </div>
+
+      {/* Instructions */}
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10">
+        <div className="px-6 py-3 bg-[#050505]/80 backdrop-blur-sm border border-[#232323] rounded-[12px] pointer-events-none">
+          <p className="text-[#B8B2A4] text-xs tracking-[0.08em] font-light">
+            Click to enter · WASD to move · Mouse to look · <span className="text-[#C8A96A]">E</span> to inspect · ESC to pause
+          </p>
+        </div>
       </div>
     </div>
   );

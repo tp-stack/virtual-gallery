@@ -1,87 +1,144 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Artwork, Gallery } from "@/lib/data";
 
-export default function HomeClient({ artworks, gallery }: { artworks: Artwork[]; gallery: Gallery }) {
-  const featured = artworks.filter((a) => a.highlight).slice(0, 6);
+export default function HomeClient({
+  artworks,
+  gallery,
+}: {
+  artworks: Artwork[];
+  gallery: Gallery;
+}) {
+  const featured = artworks.filter((a: any) => a.highlight).slice(0, 6);
 
   return (
     <>
+      {/* ─── HERO ─── */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold-500/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gold-500/3 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gallery-600/20 rounded-full blur-3xl" />
+        <div className="absolute inset-0">
+          <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-[#C8A96A]/[0.04] rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#8FA3B8]/[0.03] rounded-full blur-[100px]" />
         </div>
 
-        <div className="relative z-10 text-center max-w-5xl mx-auto px-6">
-          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
-            <p className="text-gold-500 uppercase tracking-[0.3em] text-sm font-medium mb-6">Virtual Gallery Experience</p>
-            <h1 className="font-display text-6xl md:text-8xl lg:text-9xl font-bold leading-none mb-8">
-              <span className="text-gallery-50">Timeless</span><br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-500 via-gold-300 to-gold-500">Masterpieces</span>
+        <div className="relative z-10 text-center max-w-5xl mx-auto px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            <p className="text-[#C8A96A] tracking-[0.16em] text-xs font-light mb-8 uppercase">
+              Virtual Gallery Experience
+            </p>
+            <h1 className="font-light text-7xl md:text-8xl lg:text-9xl leading-[0.9] mb-8 tracking-[-0.03em] text-[#F5F2EA]">
+              <span className="font-thin">Timeless</span>
+              <br />
+              <span className="text-[#C8A96A] font-light">Masterpieces</span>
             </h1>
-            <p className="text-gallery-300 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-light leading-relaxed">
-              Walk through centuries of human creativity. Every artwork in this gallery lives in the public domain — free for all, forever.
+            <p className="text-[#B8B2A4] text-base md:text-lg max-w-2xl mx-auto mb-14 font-light leading-relaxed tracking-wide">
+              Centuries of human creativity, curated and verified in the public domain.
+              A museum without walls, built for everyone.
             </p>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.6 }} className="flex gap-4 justify-center flex-wrap">
-            <Link href="/gallery" className="px-8 py-4 bg-gold-500 text-gallery-900 font-semibold rounded-full hover:bg-gold-400 transition-all duration-300 hover:shadow-lg hover:shadow-gold-500/20">
-              Enter Gallery
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1, duration: 0.8 }}
+            className="flex gap-6 justify-center flex-wrap"
+          >
+            <Link
+              href="/gallery"
+              className="px-10 py-4 bg-[#F5F2EA] text-[#050505] font-medium text-sm tracking-[0.08em] uppercase rounded-[12px] hover:bg-[#E6E6E6] transition-all duration-500"
+            >
+              Explore Collection
+            </Link>
+            <Link
+              href="/tour"
+              className="px-10 py-4 border border-[#232323] text-[#B8B2A4] font-light text-sm tracking-[0.08em] uppercase rounded-[12px] hover:border-[#C8A96A] hover:text-[#F5F2EA] transition-all duration-500"
+            >
+              3D Walkthrough
             </Link>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="mt-20 flex justify-center gap-12 text-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.4, duration: 0.8 }}
+            className="mt-24 flex justify-center gap-16 text-center"
+          >
             <div>
-              <p className="text-3xl font-display text-gallery-50">{artworks.length}</p>
-              <p className="text-gallery-400 text-sm mt-1">Masterpieces</p>
+              <p className="text-3xl font-thin text-[#F5F2EA]">{artworks.length}</p>
+              <p className="text-[#B8B2A4] text-xs tracking-[0.12em] uppercase mt-2 font-light">Works</p>
             </div>
             <div>
-              <p className="text-3xl font-display text-gallery-50">{gallery.rooms}</p>
-              <p className="text-gallery-400 text-sm mt-1">Gallery Wings</p>
+              <p className="text-3xl font-thin text-[#F5F2EA]">{gallery.rooms}</p>
+              <p className="text-[#B8B2A4] text-xs tracking-[0.12em] uppercase mt-2 font-light">Galleries</p>
             </div>
             <div>
-              <p className="text-3xl font-display text-gallery-50">500+</p>
-              <p className="text-gallery-400 text-sm mt-1">Years of Art</p>
+              <p className="text-3xl font-thin text-[#F5F2EA]">500+</p>
+              <p className="text-[#B8B2A4] text-xs tracking-[0.12em] uppercase mt-2 font-light">Years</p>
             </div>
           </motion.div>
         </div>
 
-        <motion.div className="absolute bottom-8 left-1/2 -translate-x-1/2" animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }}>
-          <div className="w-6 h-10 border-2 border-gallery-500 rounded-full flex justify-center pt-2">
-            <div className="w-1 h-3 bg-gallery-400 rounded-full" />
-          </div>
+        <motion.div
+          className="absolute bottom-10 left-1/2 -translate-x-1/2"
+          animate={{ y: [0, 6, 0] }}
+          transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+        >
+          <div className="w-px h-12 bg-gradient-to-b from-[#C8A96A]/40 to-transparent" />
         </motion.div>
       </section>
 
-      <section className="py-24 px-6 max-w-7xl mx-auto">
+      {/* ─── FEATURED ─── */}
+      <section className="py-32 px-8 max-w-[1440px] mx-auto">
         <div className="gold-line mb-16" />
-        <div className="flex items-end justify-between mb-12">
+        <div className="flex items-end justify-between mb-16">
           <div>
-            <p className="text-gold-500 uppercase tracking-widest text-xs mb-3">Collection</p>
-            <h2 className="font-display text-4xl md:text-5xl text-gallery-50">Featured Works</h2>
+            <p className="text-[#C8A96A] tracking-[0.16em] text-xs font-light mb-3 uppercase">Collection</p>
+            <h2 className="font-light text-4xl md:text-5xl text-[#F5F2EA] tracking-[-0.02em]">Featured Works</h2>
           </div>
-          <Link href="/gallery" className="text-gallery-300 hover:text-gold-400 transition-colors text-sm">View all →</Link>
+          <Link
+            href="/gallery"
+            className="text-[#B8B2A4] hover:text-[#C8A96A] transition-colors duration-500 text-xs tracking-[0.12em] uppercase font-light"
+          >
+            View all →
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featured.map((art, i) => (
-            <motion.div key={art.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6 }}>
+          {featured.map((art: any, i: number) => (
+            <motion.div
+              key={art.id}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
               <Link href={`/artwork/${art.id}`}>
-                <div className="artwork-card group relative overflow-hidden rounded-xl bg-gallery-800 border border-gallery-700 hover:border-gold-500/30 transition-all duration-500">
-                  <div className="relative aspect-[3/4] overflow-hidden">
-                    <img src={art.image_url} alt={art.title} className="artwork-img w-full h-full object-cover" loading="lazy" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-gallery-900 via-transparent to-transparent" />
-                    <div className="absolute top-4 right-4 px-3 py-1 bg-gold-500/90 text-gallery-900 text-xs font-semibold rounded-full">★ Highlight</div>
+                <div className="plaque group overflow-hidden">
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-t-[12px]">
+                    <img
+                      src={art.image_url}
+                      alt={art.title}
+                      className="artwork-img w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
+                    <div className="absolute top-4 right-4 px-3 py-1.5 border border-[#C8A96A]/30 text-[#C8A96A] text-[10px] tracking-[0.1em] uppercase rounded-full font-light">
+                      Featured
+                    </div>
                   </div>
-                  <div className="p-5">
-                    <h3 className="font-display text-lg text-gallery-50 group-hover:text-gold-400 transition-colors">{art.title}</h3>
-                    <p className="text-gallery-400 text-sm mt-1">{art.artist}, {art.year}</p>
-                    <p className="text-gallery-500 text-xs mt-2 uppercase tracking-wider">{art.movement}</p>
+                  <div className="p-6">
+                    <p className="text-[#B8B2A4] text-xs tracking-[0.12em] uppercase mb-1 font-light">{art.movement}</p>
+                    <h3 className="font-light text-lg text-[#F5F2EA] group-hover:text-[#C8A96A] transition-colors duration-500">
+                      {art.title}
+                    </h3>
+                    <p className="text-[#B8B2A4] text-sm mt-1 font-light">
+                      {art.artist}, <span className="text-[#8FA3B8]">{art.year}</span>
+                    </p>
                   </div>
                 </div>
               </Link>
@@ -90,30 +147,52 @@ export default function HomeClient({ artworks, gallery }: { artworks: Artwork[];
         </div>
       </section>
 
-      <section className="py-24 px-6 max-w-7xl mx-auto">
-        <div className="gold-line mb-16" />
-        <p className="text-gold-500 uppercase tracking-widest text-xs mb-3">Explore</p>
-        <h2 className="font-display text-4xl md:text-5xl text-gallery-50 mb-12">Gallery Wings</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {gallery.layout.map((room, i) => (
-            <motion.div key={room.id} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-              className="p-6 rounded-xl border border-gallery-700 hover:border-gold-500/30 transition-all duration-300 cursor-pointer group"
-              style={{ backgroundColor: room.style.wall_color + "15" }}>
-              <h3 className="font-display text-lg text-gallery-100 group-hover:text-gold-400 transition-colors">{room.name}</h3>
-              <p className="text-gallery-500 text-sm mt-2">{room.artwork_ids.length} artworks</p>
-              <div className="flex items-center gap-2 mt-3">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: room.style.wall_color }} />
-                <span className="text-gallery-500 text-xs capitalize">{room.style.ambience}</span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      {/* ─── ROOMS ─── */}
+      {gallery.layout && (
+        <section className="py-32 px-8 max-w-[1440px] mx-auto">
+          <div className="gold-line mb-16" />
+          <p className="text-[#C8A96A] tracking-[0.16em] text-xs font-light mb-3 uppercase">Explore</p>
+          <h2 className="font-light text-4xl md:text-5xl text-[#F5F2EA] mb-16 tracking-[-0.02em]">
+            Gallery Wings
+          </h2>
 
-      <footer className="py-16 px-6 border-t border-gallery-800">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-gallery-500 text-sm">All artworks are in the public domain. Images courtesy of Wikimedia Commons.</p>
-          <p className="text-gallery-600 text-xs mt-2">Built with a multi-agent AI pipeline · Curated · Verified · Free</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {gallery.layout.map((room: any, i: number) => (
+              <motion.div
+                key={room.id}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.04, duration: 0.6 }}
+                className="plaque p-6 cursor-pointer group"
+              >
+                <h3 className="font-light text-base text-[#F5F2EA] group-hover:text-[#C8A96A] transition-colors duration-500">
+                  {room.name}
+                </h3>
+                <p className="text-[#B8B2A4] text-xs mt-2 font-light tracking-wide">
+                  {room.artwork_ids.length} works
+                </p>
+                <div className="flex items-center gap-2 mt-4">
+                  <div className="w-px h-3 bg-[#C8A96A]/40" />
+                  <span className="text-[#B8B2A4] text-2xs font-light capitalize">
+                    {room.style?.ambience || "museum"}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─── FOOTER ─── */}
+      <footer className="py-16 px-8 border-t border-[#232323]">
+        <div className="max-w-[1440px] mx-auto text-center">
+          <p className="text-[#B8B2A4] text-xs tracking-[0.08em] font-light">
+            All artworks are in the public domain. Images courtesy of Wikimedia Commons and museum open access APIs.
+          </p>
+          <p className="text-[#555] text-2xs mt-4 font-light tracking-wide">
+            Curated · Verified · Free · Built with a multi-agent AI pipeline
+          </p>
         </div>
       </footer>
     </>
