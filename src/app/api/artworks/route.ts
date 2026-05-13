@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSupabaseClient } from "@/lib/supabase";
 import { getArtworksPaginated } from "@/lib/data";
 
 export async function GET(request: NextRequest) {
@@ -9,13 +10,39 @@ export async function GET(request: NextRequest) {
   const search = searchParams.get("search");
   const roomId = searchParams.get("room");
 
-  const result = getArtworksPaginated({
-    page,
-    limit,
-    movement,
-    search,
-    roomId,
-  });
+  // Try Supabase first
+  const supabase = getSupabaseClient();
+  if (supabase) {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
 
-  return NextResponse.json(result);
+    let query = supabase.from("artworks").select("*", { count: "exact" });
+
+    if (movement) query = query.eq("movement", movement);
+    if (search) {
+      query = query.or(
+        `title.ilike.%${search}%,artist.ilike.%${search}%,description.ilike.%${search}%`
+      );
+    }
+    if (roomId) query = query.eq("room_id", parseInt(roomId));
+
+    query = query.range(from, to).order("year", { ascending: true });
+
+    const { data, error, count } = await query;
+
+    if (!error && data) {
+      return NextResponse.json({
+        data,
+        total: count || 0,
+        page,
+        limit,
+        totalPages: count ? Math.ceil(count / limit) : 0,
+        source: "supabase",
+      });
+    }
+  }
+
+  // Fallback to JSON file
+  const result = getArtworksPaginated({ page, limit, movement, search, roomId });
+  return NextResponse.json({ ...result, source: "json" });
 }
