@@ -14,12 +14,12 @@ export default function GalleryClient() {
   const [activeMovement, setActiveMovement] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("grid");
-  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [movements, setMovements] = useState<{ movement: string; count: number }[]>([]);
-  const gridRef = useRef<any>(null);
+  const pageRef = useRef(1);
 
-  const fetchArtworks = useCallback(async (pageNum: number, append: boolean) => {
+  const fetchPage = useCallback(async (pageNum: number, append: boolean) => {
     setLoading(true);
     const params = new URLSearchParams({ page: String(pageNum), limit: "50" });
     if (activeMovement) params.set("movement", activeMovement);
@@ -34,17 +34,18 @@ export default function GalleryClient() {
       setArtworks(json.data || []);
     }
     setTotal(json.total || 0);
+    setHasMore(json.data?.length === 50);
     setLoading(false);
   }, [activeMovement, searchQuery]);
 
-  // Initial fetch and movements
   useEffect(() => {
-    fetchArtworks(1, false);
-    fetch("/api/artworks?limit=1")
-      .then((r) => r.json())
-      .then((d) => setTotal(d.total || 0));
+    pageRef.current = 1;
+    setArtworks([]);
+    setHasMore(true);
+    fetchPage(1, false);
+  }, [activeMovement, searchQuery]);
 
-    // Load movements from the data
+  useEffect(() => {
     (async () => {
       const res = await fetch("/api/artworks?limit=500");
       const json = await res.json();
@@ -61,23 +62,9 @@ export default function GalleryClient() {
     })();
   }, []);
 
-  // Filter/page change
-  useEffect(() => {
-    setPage(1);
-    setArtworks([]);
-    fetchArtworks(1, false);
-  }, [activeMovement, searchQuery]);
-
-  const loadMore = useCallback(() => {
-    if (loading || artworks.length >= total) return;
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchArtworks(nextPage, true);
-  }, [page, loading, total, artworks.length, fetchArtworks]);
-
-  const rowHeight = 220;
   const columnCount = 4;
   const columnWidth = 280;
+  const rowHeight = 220;
   const height = typeof window !== "undefined" ? window.innerHeight - 200 : 800;
 
   const Cell = ({ columnIndex, rowIndex, style }: any) => {
@@ -86,28 +73,28 @@ export default function GalleryClient() {
     const art = artworks[index];
     return (
       <div style={style}>
-        <ArtworkCard
-          artwork={art}
-          index={index}
-          viewMode={viewMode}
-          onClick={() => setSelected(art)}
-        />
+        <ArtworkCard artwork={art} index={index} viewMode={viewMode} onClick={() => setSelected(art)} />
       </div>
     );
   };
 
-  const rowCount = Math.ceil(artworks.length / columnCount);
+  const rowCount = Math.ceil(Math.max(artworks.length, 1) / columnCount);
+
+  const handleItemsRendered = useCallback(({ visibleRowStopIndex }: any) => {
+    const lastVisibleItem = (visibleRowStopIndex + 1) * columnCount;
+    if (lastVisibleItem >= artworks.length - columnCount && hasMore && !loading) {
+      const nextPage = pageRef.current + 1;
+      pageRef.current = nextPage;
+      fetchPage(nextPage, true);
+    }
+  }, [artworks.length, hasMore, loading, fetchPage]);
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-6 max-w-7xl mx-auto">
       <div className="mb-12">
         <p className="text-gold-500 uppercase tracking-widest text-xs mb-3">Browse</p>
-        <h1 className="font-display text-5xl md:text-6xl text-gallery-50">
-          The Collection
-        </h1>
-        <p className="text-gallery-400 mt-4 text-lg">
-          {total.toLocaleString()} artworks
-        </p>
+        <h1 className="font-display text-5xl md:text-6xl text-gallery-50">The Collection</h1>
+        <p className="text-gallery-400 mt-4 text-lg">{total.toLocaleString()} artworks</p>
       </div>
 
       <div className="gold-line mb-8" />
@@ -123,34 +110,36 @@ export default function GalleryClient() {
       />
 
       <div className="mt-8">
-        <WindowGrid
-          ref={gridRef}
-          height={height}
-          width={columnCount * columnWidth + 40}
-          columnCount={columnCount}
-          columnWidth={columnWidth}
-          rowCount={rowCount}
-          rowHeight={rowHeight}
-          onItemsRendered={({ visibleRowStopIndex }: any) => {
-            const lastVisibleItem = (visibleRowStopIndex + 1) * columnCount;
-            if (lastVisibleItem >= artworks.length - columnCount && artworks.length < total) {
-              loadMore();
-            }
-          }}
-        >
-          {Cell}
-        </WindowGrid>
-        {loading && (
-          <div className="text-center py-8">
+        {artworks.length > 0 ? (
+          <WindowGrid
+            height={height}
+            width={columnCount * columnWidth + 40}
+            columnCount={columnCount}
+            columnWidth={columnWidth}
+            rowCount={rowCount}
+            rowHeight={rowHeight}
+            onItemsRendered={handleItemsRendered}
+          >
+            {Cell}
+          </WindowGrid>
+        ) : loading ? (
+          <div className="text-center py-24">
             <div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          </div>
+        ) : (
+          <div className="text-center py-24">
+            <p className="text-gallery-400 text-xl">No artworks found</p>
+          </div>
+        )}
+        {loading && artworks.length > 0 && (
+          <div className="text-center py-4">
+            <div className="w-6 h-6 border-2 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto" />
           </div>
         )}
       </div>
 
       <AnimatePresence>
-        {selected && (
-          <ArtworkModal artwork={selected} onClose={() => setSelected(null)} />
-        )}
+        {selected && <ArtworkModal artwork={selected} onClose={() => setSelected(null)} />}
       </AnimatePresence>
     </div>
   );

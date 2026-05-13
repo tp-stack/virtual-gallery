@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "python agents/orchestrator.py && next dev",
+    "build": "python agents/orchestrator.py && next build",
     "start": "next start",
-    "lint": "next lint",
-    "pipeline": "python agents/orchestrator_db.py"
+    "lint": "next lint"
   },
   "dependencies": {
     "@react-three/drei": "^9.88.0",

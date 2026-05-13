@@ -5,8 +5,10 @@ import math
 import os
 import re
 import sys
+import time
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
@@ -21,25 +23,7 @@ ROOM_WIDTH = 30
 ROOM_DEPTH = 20
 MAX_PER_ROOM = 10
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
-SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
-FETCH_LIMIT = int(os.environ.get("FETCH_LIMIT", "0") or "0")
-
-BATCH_SIZE = 500
-
-
-def _load_dotenv():
-    env_path = os.path.join(os.path.dirname(__file__), ".python.env")
-    if os.path.exists(env_path):
-        with open(env_path) as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#") and "=" in line:
-                    k, v = line.split("=", 1)
-                    os.environ.setdefault(k.strip(), v.strip())
-
-
-_load_dotenv()
+executor = ThreadPoolExecutor(max_workers=10)
 
 
 def _compute_position(artwork_index: int) -> tuple:
@@ -60,98 +44,65 @@ def _compute_position(artwork_index: int) -> tuple:
 class ArchivistAgent:
     def __init__(self):
         self.sem = asyncio.Semaphore(10)
-        self.total_inserted = 0
 
-    def _supabase_headers(self) -> dict:
-        return {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
-            "Content-Type": "application/json",
-            "Prefer": "return=minimal",
-        }
+    async def fetch_artworks(self, limit: int = 200) -> list[dict]:
+        """Fetch artworks from APIs and return as list of dicts."""
+        all_artworks = self._core_artworks()
+        logger.info(f"Archivist fetching up to {limit} artworks")
 
-    async def _insert_batch(self, rows: list[dict]):
-        if not rows:
-            return
-        async with httpx.AsyncClient() as client:
-            url = f"{SUPABASE_URL}/rest/v1/artworks"
-            resp = await client.post(url, headers=self._supabase_headers(), json=rows)
-            if resp.status_code not in (200, 201):
-                logger.error(f"Supabase insert error {resp.status_code}: {resp.text[:200]}")
+        met_limit = limit // 2
+        aic_limit = limit - met_limit
 
-    async def fetch_and_store(self, limit: int = 50000):
-        logger.info(f"Archivist: fetching up to {limit} artworks and storing in Supabase")
-
-        total_needed = limit
-        existing_count = await self._count_existing()
-        if existing_count >= total_needed:
-            logger.info(f"Already have {existing_count} artworks, skipping API fetch")
-            return existing_count
-
-        need = total_needed - existing_count
-        met_need = need // 2
-        aic_need = need - met_need
-
-        core_rows = self._core_artworks()
-        self.total_inserted += len(core_rows)
-
-        api_tasks = []
-        if met_need > 0:
-            api_tasks.append(self._fetch_met(met_need))
-        if aic_need > 0:
-            api_tasks.append(self._fetch_aic(aic_need))
-
-        if api_tasks:
-            results = await asyncio.gather(*api_tasks, return_exceptions=True)
-            for r in results:
-                if isinstance(r, list):
-                    await self._insert_batch(r)
-                    self.total_inserted += len(r)
-
-        await self._insert_batch(core_rows)
-
-        final_count = await self._count_existing()
-        logger.info(f"Pipeline complete. Total artworks in DB: {final_count}")
-        return final_count
-
-    async def _count_existing(self) -> int:
         try:
-            async with httpx.AsyncClient() as client:
-                url = f"{SUPABASE_URL}/rest/v1/artworks?select=count&limit=0"
-                resp = await client.get(url, headers=self._supabase_headers())
-                if resp.status_code == 200:
-                    return int(resp.json()[0]["count"])
-        except Exception:
-            pass
-        return 0
+            met_results = await self._fetch_met(met_limit)
+            all_artworks.extend(met_results)
+            logger.info(f"Met Museum: {len(met_results)} artworks")
+        except Exception as e:
+            logger.error(f"Met API failed: {e}")
 
-    def _core_artworks(self) -> list[dict]:
-        cores = [
-            {"source_id": "core-mona-lisa", "title": "Mona Lisa (La Gioconda)", "artist": "Leonardo da Vinci", "year": 1503, "movement": "Renaissance", "origin": "Italy", "medium": "Oil on poplar panel", "museum": "Louvre, Paris",
-             "image_url_3d": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
-             "image_url_hd": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
-             "dimensions": "77 cm x 53 cm", "source_api": "core", "highlight": True},
-            {"source_id": "core-starry-night", "title": "The Starry Night", "artist": "Vincent van Gogh", "year": 1889, "movement": "Post-Impressionism", "origin": "France", "medium": "Oil on canvas", "museum": "MoMA, New York",
-             "image_url_3d": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/400px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
-             "image_url_hd": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
-             "dimensions": "73.7 cm x 92.1 cm", "source_api": "core", "highlight": True},
-            {"source_id": "core-girl-pearl", "title": "Girl with a Pearl Earring", "artist": "Johannes Vermeer", "year": 1665, "movement": "Baroque", "origin": "Netherlands", "medium": "Oil on canvas", "museum": "Mauritshuis, The Hague",
-             "image_url_3d": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg/400px-Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg",
-             "image_url_hd": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg/800px-Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg",
-             "dimensions": "44.5 cm x 39 cm", "source_api": "core", "highlight": True},
-            {"source_id": "core-great-wave", "title": "The Great Wave off Kanagawa", "artist": "Katsushika Hokusai", "year": 1831, "movement": "Ukiyo-e", "origin": "Japan", "medium": "Woodblock print", "museum": "Met Museum, New York",
-             "image_url_3d": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/400px-Tsunami_by_hokusai_19th_century.jpg",
-             "image_url_hd": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1280px-Tsunami_by_hokusai_19th_century.jpg",
-             "dimensions": "25.7 cm x 37.8 cm", "source_api": "core", "highlight": True},
-        ]
-        for i, art in enumerate(cores):
+        try:
+            aic_results = await self._fetch_aic(aic_limit)
+            all_artworks.extend(aic_results)
+            logger.info(f"AIC: {len(aic_results)} artworks")
+        except Exception as e:
+            logger.error(f"AIC API failed: {e}")
+
+        # Assign positions and timestamps
+        now = datetime.now(timezone.utc).isoformat()
+        for i, art in enumerate(all_artworks):
             px, py, pz, rot, rid = _compute_position(i)
             art["position_x"] = px
             art["position_y"] = py
             art["position_z"] = pz
             art["rotation_y"] = rot
             art["room_id"] = rid
-        return cores
+            art["created_at"] = now
+
+        return all_artworks
+
+    def _core_artworks(self) -> list[dict]:
+        return [
+            {"source_id": "core-mona-lisa", "id": "mona-lisa", "title": "Mona Lisa (La Gioconda)", "artist": "Leonardo da Vinci", "year": 1503, "movement": "Renaissance", "origin": "Italy", "medium": "Oil on poplar panel", "museum": "Louvre, Paris",
+             "image_url": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
+             "image_url_3d": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
+             "image_url_hd": "https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
+             "dimensions": "77 cm x 53 cm", "description": "", "description_long": "", "audio_narration": "", "tags": [], "highlight": True, "source_api": "core"},
+            {"source_id": "core-starry-night", "id": "starry-night", "title": "The Starry Night", "artist": "Vincent van Gogh", "year": 1889, "movement": "Post-Impressionism", "origin": "France", "medium": "Oil on canvas", "museum": "MoMA, New York",
+             "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+             "image_url_3d": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/400px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+             "image_url_hd": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+             "dimensions": "73.7 cm x 92.1 cm", "description": "", "description_long": "", "audio_narration": "", "tags": [], "highlight": True, "source_api": "core"},
+            {"source_id": "core-girl-pearl", "id": "girl-pearl-earring", "title": "Girl with a Pearl Earring", "artist": "Johannes Vermeer", "year": 1665, "movement": "Baroque", "origin": "Netherlands", "medium": "Oil on canvas", "museum": "Mauritshuis, The Hague",
+             "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg/800px-Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg",
+             "image_url_3d": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg/400px-Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg",
+             "image_url_hd": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg/800px-Vermeer%2C_Johannes_-_Girl_with_a_Pearl_Earring.jpg",
+             "dimensions": "44.5 cm x 39 cm", "description": "", "description_long": "", "audio_narration": "", "tags": [], "highlight": True, "source_api": "core"},
+            {"source_id": "core-great-wave", "id": "great-wave", "title": "The Great Wave off Kanagawa", "artist": "Katsushika Hokusai", "year": 1831, "movement": "Ukiyo-e", "origin": "Japan", "medium": "Woodblock print", "museum": "Met Museum, New York",
+             "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1280px-Tsunami_by_hokusai_19th_century.jpg",
+             "image_url_3d": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/400px-Tsunami_by_hokusai_19th_century.jpg",
+             "image_url_hd": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Tsunami_by_hokusai_19th_century.jpg/1280px-Tsunami_by_hokusai_19th_century.jpg",
+             "dimensions": "25.7 cm x 37.8 cm", "description": "", "description_long": "", "audio_narration": "", "tags": [], "highlight": True, "source_api": "core"},
+        ]
 
     async def _fetch_met(self, limit: int) -> list[dict]:
         logger.info(f"Fetching up to {limit} from Met Museum")
@@ -167,9 +118,7 @@ class ArchivistAgent:
             object_ids = data.get("objectIDs", [])[:limit]
             tasks = [self._fetch_met_object(client, oid) for oid in object_ids]
             results = await asyncio.gather(*tasks, return_exceptions=True)
-            rows = [r for r in results if isinstance(r, dict)]
-            logger.info(f"Met: {len(rows)} valid artworks")
-            return rows
+            return [r for r in results if isinstance(r, dict)]
 
     async def _fetch_met_object(self, client: httpx.AsyncClient, oid: int) -> dict | None:
         async with self.sem:
@@ -195,8 +144,9 @@ class ArchivistAgent:
         img_small = obj.get("primaryImageSmall", "") or obj.get("primaryImage", "")
         img_hd = obj.get("primaryImage", "")
 
-        row = {
+        return {
             "source_id": f"met-{oid}",
+            "id": f"met-{oid}",
             "title": title,
             "artist": artist,
             "year": year,
@@ -204,15 +154,17 @@ class ArchivistAgent:
             "origin": obj.get("artistNationality", ""),
             "medium": obj.get("medium", ""),
             "museum": "Metropolitan Museum of Art",
+            "image_url": img_small,
             "image_url_3d": img_small,
             "image_url_hd": img_hd,
             "dimensions": obj.get("dimensions", ""),
             "description": "",
             "description_long": obj.get("creditLine", ""),
-            "source_api": "met",
+            "audio_narration": "",
+            "tags": [],
             "highlight": False,
+            "source_api": "met",
         }
-        return row
 
     async def _fetch_aic(self, limit: int) -> list[dict]:
         logger.info(f"Fetching up to {limit} from Art Institute Chicago")
@@ -258,6 +210,7 @@ class ArchivistAgent:
 
                     all_rows.append({
                         "source_id": f"aic-{item['id']}",
+                        "id": f"aic-{item['id']}",
                         "title": title,
                         "artist": artist.split("\n")[0].strip(),
                         "year": year,
@@ -265,15 +218,17 @@ class ArchivistAgent:
                         "origin": item.get("place_of_origin", ""),
                         "medium": item.get("medium_display", ""),
                         "museum": "Art Institute of Chicago",
+                        "image_url": f"https://www.artic.edu/iiif/2/{image_id}/full/400,/0/default.jpg",
                         "image_url_3d": f"https://www.artic.edu/iiif/2/{image_id}/full/400,/0/default.jpg",
                         "image_url_hd": f"https://www.artic.edu/iiif/2/{image_id}/full/800,/0/default.jpg",
                         "dimensions": item.get("dimensions", ""),
                         "description": "",
                         "description_long": item.get("credit_line", ""),
-                        "source_api": "aic",
+                        "audio_narration": "",
+                        "tags": [],
                         "highlight": False,
+                        "source_api": "aic",
                     })
                 page += 1
 
-        logger.info(f"AIC: {len(all_rows)} artworks")
         return all_rows
