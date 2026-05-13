@@ -1,35 +1,41 @@
 import { NextResponse } from "next/server";
-import { getGalleryData } from "@/lib/data";
+import { getSupabaseClient } from "@/lib/supabase";
 
 export async function GET() {
-  const data = getGalleryData();
-
-  const rooms = data.gallery.layout.map((room) => ({
-    id: room.id,
-    name: room.name,
-    movement: room.movement,
-    artwork_ids: room.artwork_ids,
-    position: room.position || { x: 0, y: 0, z: 0 },
-    width: room.dimensions?.width || 30,
-    depth: room.dimensions?.depth || 20,
-  }));
-
-  const artworkPositions: Record<string, { x: number; y: number; z: number; rotY: number }> = {};
-  for (const room of data.gallery.layout) {
-    const placements = room.artwork_placements || [];
-    for (const p of placements) {
-      artworkPositions[p.artwork_id] = {
-        x: p.position.x,
-        y: p.position.y,
-        z: p.position.z,
-        rotY: p.rotationY,
-      };
-    }
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return NextResponse.json({
+      rooms: [],
+      total_rooms: 0,
+      dimensions: { width: 30, height: 5, depth: 20 },
+    });
   }
+
+  const { data: roomData, error } = await supabase
+    .from("artworks")
+    .select("room_id")
+    .not("room_id", "is", null)
+    .order("room_id");
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const roomIds = Array.from(new Set(roomData.map((r: any) => r.room_id))).sort(
+    (a: any, b: any) => a - b
+  );
+
+  const rooms = roomIds.map((rid: any) => ({
+    id: `room-${rid}`,
+    room_id: rid,
+    position: { x: (rid % 3) * 30, y: 0, z: Math.floor(rid / 3) * 22 },
+    width: 30,
+    depth: 20,
+  }));
 
   return NextResponse.json({
     rooms,
-    artworks: data.artworks,
-    artwork_positions: artworkPositions,
+    total_rooms: rooms.length,
+    dimensions: { width: 30, height: 5, depth: 20 },
   });
 }

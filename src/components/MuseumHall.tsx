@@ -12,16 +12,16 @@ export default function MuseumHall({
   const w = room.width || 30;
   const d = room.depth || 20;
   const h = 5;
-  const wallThickness = 0.5;
-  const zPos = room.position.z;
-  const xPos = room.position.x;
+  const wt = 0.5;
+  const zPos = room.position?.z || 0;
+  const xPos = room.position?.x || 0;
 
   return (
     <group position={[xPos, 0, zPos]}>
       {/* Floor */}
       <RigidBody type="fixed" colliders="cuboid">
         <mesh position={[w / 2, -0.25, d / 2]} receiveShadow>
-          <boxGeometry args={[w, wallThickness, d]} />
+          <boxGeometry args={[w, wt, d]} />
           <meshStandardMaterial color="#1a1a1a" roughness={0.8} />
         </mesh>
       </RigidBody>
@@ -29,7 +29,7 @@ export default function MuseumHall({
       {/* Left Wall */}
       <RigidBody type="fixed" colliders="cuboid">
         <mesh position={[0, h / 2, d / 2]}>
-          <boxGeometry args={[wallThickness, h, d]} />
+          <boxGeometry args={[wt, h, d]} />
           <meshStandardMaterial color="#1e1e1e" />
         </mesh>
       </RigidBody>
@@ -37,7 +37,7 @@ export default function MuseumHall({
       {/* Right Wall */}
       <RigidBody type="fixed" colliders="cuboid">
         <mesh position={[w, h / 2, d / 2]}>
-          <boxGeometry args={[wallThickness, h, d]} />
+          <boxGeometry args={[wt, h, d]} />
           <meshStandardMaterial color="#1e1e1e" />
         </mesh>
       </RigidBody>
@@ -45,29 +45,29 @@ export default function MuseumHall({
       {/* Back Wall */}
       <RigidBody type="fixed" colliders="cuboid">
         <mesh position={[w / 2, h / 2, 0]}>
-          <boxGeometry args={[w, h, wallThickness]} />
+          <boxGeometry args={[w, h, wt]} />
           <meshStandardMaterial color="#111" />
         </mesh>
       </RigidBody>
 
-      {/* Front Wall with Doorway */}
+      {/* Front wall (open - connects to next room) */}
       {!isLast && (
         <>
           <RigidBody type="fixed" colliders="cuboid">
             <mesh position={[w / 2 - 6, h / 2, d]}>
-              <boxGeometry args={[w - 12, h, wallThickness]} />
+              <boxGeometry args={[w - 12, h, wt]} />
               <meshStandardMaterial color="#111" />
             </mesh>
           </RigidBody>
           <RigidBody type="fixed" colliders="cuboid">
             <mesh position={[w / 2 + 6, h / 2, d]}>
-              <boxGeometry args={[w - 12, h, wallThickness]} />
+              <boxGeometry args={[w - 12, h, wt]} />
               <meshStandardMaterial color="#111" />
             </mesh>
           </RigidBody>
           <RigidBody type="fixed" colliders="cuboid">
             <mesh position={[w / 2, h - 1, d]}>
-              <boxGeometry args={[12, 2, wallThickness]} />
+              <boxGeometry args={[12, 2, wt]} />
               <meshStandardMaterial color="#111" />
             </mesh>
           </RigidBody>
