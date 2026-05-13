@@ -1,0 +1,48 @@
+name: Archive Worker — Continuous Artwork Ingestion
+
+on:
+  schedule:
+    # Run daily at 3 AM UTC to fetch new public domain works
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Number of artworks to fetch (0 = auto)"
+        required: false
+        default: "2000"
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    concurrency: archive-ingest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install httpx --quiet
+
+      - name: Run orchestrator
+        run: python agents/orchestrator.py
+        env:
+          FETCH_LIMIT: ${{ github.event.inputs.limit || '2000' }}
+
+      - name: Upload to Supabase
+        run: python scripts/upload_to_supabase.py
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: Commit updated artworks.json
+        run: |
+          git config user.name "archive-bot"
+          git config user.email "bot@virtual-gallery.app"
+          git add public/data/artworks.json
+          git diff --cached --quiet || git commit -m "auto: sync artworks.json ($(date +%Y-%m-%d))"
+          git push
