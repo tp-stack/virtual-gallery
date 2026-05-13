@@ -1,0 +1,15 @@
+
+> virtual-gallery@1.0.0 dev
+> node scripts/ensure-data.js && next dev
+
+[ensure-data] artworks.json exists (221734 bytes), skipping Python pipeline
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 2.9s
+ ○ Compiling / ...
+ ✓ Compiled / in 5.2s (1224 modules)
+ GET / 200 in 5441ms
+ GET / 200 in 171ms
+ GET / 200 in 64ms

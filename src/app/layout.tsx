@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "Virtual Gallery — Public Domain Masterpieces",
@@ -11,8 +12,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen bg-[#050505]">
-        <Navbar />
-        {children}
+        <ErrorBoundary>
+          <Navbar />
+          {children}
+        </ErrorBoundary>
       </body>
     </html>
   );
