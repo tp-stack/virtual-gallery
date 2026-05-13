@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "python agents/orchestrator.py && next dev",
-    "build": "python -m pip install httpx -q && python agents/orchestrator.py && next build",
+    "build": "python agents/orchestrator.py && next build",
     "start": "next start",
     "lint": "next lint"
   },
