@@ -86,7 +86,7 @@ export default function GalleryClient() {
     );
   };
 
-  const rowCount = Math.ceil(Math.max(artworks.length, 1) / columnCount);
+  const rowCount = Math.max(1, Math.ceil(Math.max(artworks.length, 1) / columnCount));
 
   const handleItemsRendered = useCallback(
     ({ visibleRowStopIndex }: any) => {
