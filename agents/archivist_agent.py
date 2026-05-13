@@ -2,16 +2,13 @@ import asyncio
 import json
 import logging
 import math
-import os
 import re
-import sys
 import time
 import urllib.parse
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Any
-
-import httpx
 
 logger = logging.getLogger("ArchivistAgent")
 
@@ -29,16 +26,19 @@ executor = ThreadPoolExecutor(max_workers=10)
 def _compute_position(artwork_index: int) -> tuple:
     room_id = artwork_index // MAX_PER_ROOM
     pos_in_room = artwork_index % MAX_PER_ROOM
-    grid_row = room_id // 3
-    grid_col = room_id % 3
-    z_pos = grid_row * (ROOM_DEPTH + 2)
-    x_pos = grid_col * ROOM_WIDTH
+    z_pos = room_id * (ROOM_DEPTH + 2)
     is_left = pos_in_room % 2 == 0
     wall_spacing = ROOM_DEPTH / (MAX_PER_ROOM + 1)
-    px = x_pos + (2 if is_left else ROOM_WIDTH - 2)
+    px = 2 if is_left else ROOM_WIDTH - 2
     pz = z_pos + wall_spacing * (pos_in_room + 1)
     rot_y = math.pi / 2 if is_left else -math.pi / 2
     return round(px, 2), 1.6, round(pz, 2), round(rot_y, 2), room_id
+
+
+def _fetch_json(url: str, timeout: int = 15) -> dict:
+    req = urllib.request.Request(url, headers={"User-Agent": "VirtualGallery/1.0"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read())
 
 
 class ArchivistAgent:
@@ -46,7 +46,6 @@ class ArchivistAgent:
         self.sem = asyncio.Semaphore(10)
 
     async def fetch_artworks(self, limit: int = 200) -> list[dict]:
-        """Fetch artworks from APIs and return as list of dicts."""
         all_artworks = self._core_artworks()
         logger.info(f"Archivist fetching up to {limit} artworks")
 
@@ -67,7 +66,6 @@ class ArchivistAgent:
         except Exception as e:
             logger.error(f"AIC API failed: {e}")
 
-        # Assign positions and timestamps
         now = datetime.now(timezone.utc).isoformat()
         for i, art in enumerate(all_artworks):
             px, py, pz, rot, rid = _compute_position(i)
@@ -106,26 +104,24 @@ class ArchivistAgent:
 
     async def _fetch_met(self, limit: int) -> list[dict]:
         logger.info(f"Fetching up to {limit} from Met Museum")
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            try:
-                resp = await client.get(MET_SEARCH, params={"q": "painting", "hasImages": True, "isPublicDomain": True})
-                resp.raise_for_status()
-                data = resp.json()
-            except Exception as e:
-                logger.warning(f"Met search failed: {e}")
-                return []
+        search_url = f"{MET_SEARCH}?q=painting&hasImages=true&isPublicDomain=true"
+        loop = asyncio.get_event_loop()
+        try:
+            data = await loop.run_in_executor(executor, _fetch_json, search_url)
+        except Exception as e:
+            logger.warning(f"Met search failed: {e}")
+            return []
 
-            object_ids = data.get("objectIDs", [])[:limit]
-            tasks = [self._fetch_met_object(client, oid) for oid in object_ids]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            return [r for r in results if isinstance(r, dict)]
+        object_ids = data.get("objectIDs", [])[:limit]
+        tasks = [self._fetch_met_object(oid, loop) for oid in object_ids]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        return [r for r in results if isinstance(r, dict)]
 
-    async def _fetch_met_object(self, client: httpx.AsyncClient, oid: int) -> dict | None:
+    async def _fetch_met_object(self, oid: int, loop) -> dict | None:
         async with self.sem:
+            url = f"{MET_OBJECT}/{oid}"
             try:
-                resp = await client.get(f"{MET_OBJECT}/{oid}")
-                resp.raise_for_status()
-                obj = resp.json()
+                obj = await loop.run_in_executor(executor, _fetch_json, url)
             except Exception:
                 return None
 
@@ -147,23 +143,12 @@ class ArchivistAgent:
         return {
             "source_id": f"met-{oid}",
             "id": f"met-{oid}",
-            "title": title,
-            "artist": artist,
-            "year": year,
-            "movement": obj.get("department", "Unknown"),
-            "origin": obj.get("artistNationality", ""),
-            "medium": obj.get("medium", ""),
-            "museum": "Metropolitan Museum of Art",
-            "image_url": img_small,
-            "image_url_3d": img_small,
-            "image_url_hd": img_hd,
-            "dimensions": obj.get("dimensions", ""),
-            "description": "",
-            "description_long": obj.get("creditLine", ""),
-            "audio_narration": "",
-            "tags": [],
-            "highlight": False,
-            "source_api": "met",
+            "title": title, "artist": artist, "year": year,
+            "movement": obj.get("department", "Unknown"), "origin": obj.get("artistNationality", ""),
+            "medium": obj.get("medium", ""), "museum": "Metropolitan Museum of Art",
+            "image_url": img_small, "image_url_3d": img_small, "image_url_hd": img_hd,
+            "dimensions": obj.get("dimensions", ""), "description": "", "description_long": obj.get("creditLine", ""),
+            "audio_narration": "", "tags": [], "highlight": False, "source_api": "met",
         }
 
     async def _fetch_aic(self, limit: int) -> list[dict]:
@@ -171,64 +156,54 @@ class ArchivistAgent:
         all_rows = []
         page = 1
         per_page = 100
+        loop = asyncio.get_event_loop()
 
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            while len(all_rows) < limit:
-                async with self.sem:
-                    try:
-                        resp = await client.get(AIC_SEARCH, params={
-                            "q": "painting", "query[term][is_public_domain]": True,
-                            "limit": per_page, "page": page,
-                            "fields": "id,title,artist_display,image_id,date_display,medium_display,department_title,dimensions,credit_line,place_of_origin",
-                        })
-                        resp.raise_for_status()
-                        data = resp.json()
-                    except Exception:
-                        break
+        while len(all_rows) < limit:
+            params = urllib.parse.urlencode({
+                "q": "painting", "query[term][is_public_domain]": True,
+                "limit": per_page, "page": page,
+                "fields": "id,title,artist_display,image_id,date_display,medium_display,department_title,dimensions,credit_line,place_of_origin",
+            })
+            url = f"{AIC_SEARCH}?{params}"
 
-                results = data.get("data", [])
-                if not results:
+            async with self.sem:
+                try:
+                    data = await loop.run_in_executor(executor, _fetch_json, url)
+                except Exception:
                     break
 
-                for item in results:
-                    if len(all_rows) >= limit:
-                        break
-                    title = (item.get("title") or "").strip()
-                    artist = (item.get("artist_display") or "").strip()
-                    if not title or not artist:
-                        continue
-                    image_id = item.get("image_id")
-                    if not image_id:
-                        continue
+            results = data.get("data", [])
+            if not results:
+                break
 
-                    year_str = item.get("date_display", "")
-                    year = 0
-                    if year_str:
-                        match = re.search(r"\d{3,4}", year_str)
-                        if match:
-                            year = int(match.group())
+            for item in results:
+                if len(all_rows) >= limit:
+                    break
+                title = (item.get("title") or "").strip()
+                artist = (item.get("artist_display") or "").strip()
+                if not title or not artist:
+                    continue
+                image_id = item.get("image_id")
+                if not image_id:
+                    continue
+                year_str = item.get("date_display", "")
+                year = 0
+                if year_str:
+                    match = re.search(r"\d{3,4}", year_str)
+                    if match:
+                        year = int(match.group())
 
-                    all_rows.append({
-                        "source_id": f"aic-{item['id']}",
-                        "id": f"aic-{item['id']}",
-                        "title": title,
-                        "artist": artist.split("\n")[0].strip(),
-                        "year": year,
-                        "movement": item.get("department_title", "Unknown"),
-                        "origin": item.get("place_of_origin", ""),
-                        "medium": item.get("medium_display", ""),
-                        "museum": "Art Institute of Chicago",
-                        "image_url": f"https://www.artic.edu/iiif/2/{image_id}/full/400,/0/default.jpg",
-                        "image_url_3d": f"https://www.artic.edu/iiif/2/{image_id}/full/400,/0/default.jpg",
-                        "image_url_hd": f"https://www.artic.edu/iiif/2/{image_id}/full/800,/0/default.jpg",
-                        "dimensions": item.get("dimensions", ""),
-                        "description": "",
-                        "description_long": item.get("credit_line", ""),
-                        "audio_narration": "",
-                        "tags": [],
-                        "highlight": False,
-                        "source_api": "aic",
-                    })
-                page += 1
+                all_rows.append({
+                    "source_id": f"aic-{item['id']}", "id": f"aic-{item['id']}", "title": title,
+                    "artist": artist.split("\n")[0].strip(), "year": year,
+                    "movement": item.get("department_title", "Unknown"), "origin": item.get("place_of_origin", ""),
+                    "medium": item.get("medium_display", ""), "museum": "Art Institute of Chicago",
+                    "image_url": f"https://www.artic.edu/iiif/2/{image_id}/full/400,/0/default.jpg",
+                    "image_url_3d": f"https://www.artic.edu/iiif/2/{image_id}/full/400,/0/default.jpg",
+                    "image_url_hd": f"https://www.artic.edu/iiif/2/{image_id}/full/800,/0/default.jpg",
+                    "dimensions": item.get("dimensions", ""), "description": "", "description_long": item.get("credit_line", ""),
+                    "audio_narration": "", "tags": [], "highlight": False, "source_api": "aic",
+                })
+            page += 1
 
         return all_rows
