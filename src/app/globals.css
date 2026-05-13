@@ -74,6 +74,19 @@ body {
   animation: goldExpand 1.8s ease-out forwards;
 }
 
+/* Moving gold gradient for charge bar */
+@keyframes goldLineMove {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.gold-line-move {
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  background-size: 200% 100%;
+  animation: goldLineMove 1.5s ease-in-out infinite;
+  transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
 /* Fade up */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24px); }

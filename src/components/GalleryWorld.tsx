@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo, useEffect, useState, useCallback } from "react";
+import { useRef, useMemo, useEffect, useState, useCallback, Component, ErrorInfo, ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { Suspense } from "react";
@@ -11,6 +11,17 @@ import Player from "./Player";
 import ArtworkFrame from "./ArtworkFrame";
 import ArtworkModal from "./ArtworkModal";
 import FrameErrorBoundary from "./FrameErrorBoundary";
+import MuseumError from "./MuseumError";
+
+class PhysicsErrorBoundary extends Component<{ children: ReactNode; onError?: () => void }> {
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error("[Physics Error]", error.message, info.componentStack);
+    this.props.onError?.();
+  }
+  render() {
+    return this.props.children;
+  }
+}
 
 const RAY_DISTANCE = 3;
 const TEXTURE_RADIUS = 30;
@@ -20,12 +31,13 @@ function MuseumContent() {
   const [rooms, setRooms] = useState<any[]>([]);
   const [allArtworks, setAllArtworks] = useState<any[]>([]);
   const [selectedArt, setSelectedArt] = useState<any>(null);
+  const hoveredRef = useRef<any>(null);
   const [hoveredArt, setHoveredArt] = useState<any>(null);
   const keysPressed = useRef(new Set<string>());
   const raycaster = useRef(new Raycaster());
   const center = useRef(new Vector2(0, 0));
+  const frameCount = useRef(0);
 
-  // Fetch all data on mount
   useEffect(() => {
     Promise.all([
       fetch("/api/gallery").then((r) => r.json()),
@@ -47,7 +59,6 @@ function MuseumContent() {
     };
   }, []);
 
-  // Build artwork lookup
   const artworkMap = useMemo(() => {
     const map = new Map<string, any>();
     for (const art of allArtworks) {
@@ -57,17 +68,24 @@ function MuseumContent() {
     return map;
   }, [allArtworks]);
 
-  // Raycasting
+  // Raycasting — only check every 3rd frame to reduce load
   useFrame(() => {
+    frameCount.current++;
+    if (frameCount.current % 3 !== 0) return;
+
     raycaster.current.setFromCamera(center.current, camera);
     const intersects = raycaster.current.intersectObjects(scene.children, true);
     const hit = intersects.find(
       (i: any) => i.object.userData?.artworkId && i.distance < RAY_DISTANCE
     );
 
+    const prev = hoveredRef.current;
     if (hit) {
       const data = (hit.object as any).userData;
-      setHoveredArt(data);
+      if (prev?.artworkId !== data.artworkId) {
+        hoveredRef.current = data;
+        setHoveredArt(data);
+      }
       if (keysPressed.current.has("e")) {
         const art = artworkMap.get(data.artworkId);
         if (art) {
@@ -75,24 +93,20 @@ function MuseumContent() {
           keysPressed.current.delete("e");
         }
       }
-    } else {
+    } else if (prev) {
+      hoveredRef.current = null;
       setHoveredArt(null);
     }
   });
 
   return (
     <>
-      {/* All rooms */}
       {rooms.map((room: any, i: number) => (
         <MuseumHall key={room.id} room={room} isLast={i === rooms.length - 1} />
       ))}
 
-      {/* Instanced frames for ALL artworks */}
-      {allArtworks.length > 0 && (
-        <InstancedFrames artworks={allArtworks} />
-      )}
+      {allArtworks.length > 0 && <InstancedFrames artworks={allArtworks} />}
 
-      {/* Individual artwork images within radius */}
       {allArtworks
         .filter((art: any) => {
           const dx = (art.position_x || 0) - camera.position.x;
@@ -105,7 +119,7 @@ function MuseumContent() {
               artwork={art}
               position={[art.position_x || 0, art.position_y || 1.6, art.position_z || 0]}
               rotation={[0, art.rotation_y || 0, 0]}
-              hovered={hoveredArt?.artworkId === (art.source_id || art.id)}
+              hovered={hoveredRef.current?.artworkId === (art.source_id || art.id)}
               artworkId={art.source_id || art.id}
             />
           </FrameErrorBoundary>
@@ -161,21 +175,39 @@ function InstancedFrames({ artworks }: { artworks: any[] }) {
 }
 
 export default function GalleryWorld() {
+  const [physicsError, setPhysicsError] = useState(false);
+
+  if (physicsError) {
+    return (
+      <div className="w-screen h-screen bg-[#050505]">
+        <MuseumError
+          diagnostics={[
+            { label: "WebGL", ok: true },
+            { label: "Physics Engine", ok: false },
+            { label: "Gallery Data", ok: true },
+          ]}
+          onRetry={() => window.location.reload()}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="w-screen h-screen relative bg-[#050505]">
-      <Canvas shadows camera={{ fov: 75, near: 0.1, far: 500 }}>
+      <Canvas shadows camera={{ fov: 75, near: 0.1, far: 500 }} onCreated={({ gl }) => gl.setClearColor("#050505")}>
         <fog attach="fog" args={["#050505", 10, 300]} />
         <ambientLight intensity={0.2} />
         <Suspense fallback={null}>
-          <Physics gravity={[0, 0, 0]}>
-            <Player />
-            <MuseumContent />
-          </Physics>
+          <PhysicsErrorBoundary onError={() => setPhysicsError(true)}>
+            <Physics gravity={[0, 0, 0]}>
+              <Player />
+              <MuseumContent />
+            </Physics>
+          </PhysicsErrorBoundary>
           <PointerLockControls />
         </Suspense>
       </Canvas>
 
-      {/* Crosshair */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
         <div className="w-8 h-8 relative">
           <div className="absolute top-1/2 left-1/4 right-1/4 h-px bg-white/20" />
@@ -184,7 +216,6 @@ export default function GalleryWorld() {
         </div>
       </div>
 
-      {/* Instructions */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10">
         <div className="px-6 py-3 bg-[#050505]/80 backdrop-blur-sm border border-[#232323] rounded-[12px] pointer-events-none">
           <p className="text-[#B8B2A4] text-xs tracking-[0.08em] font-light">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { Html } from "@react-three/drei";
 import * as THREE from "three";
 
 export default function ArtworkFrame({
@@ -18,7 +19,9 @@ export default function ArtworkFrame({
 }) {
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
   const [errored, setErrored] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const mountedRef = useRef(true);
+  const textureRef = useRef<THREE.Texture | null>(null);
 
   const imgUrl = artwork.image_url_3d || artwork.image_url;
 
@@ -26,6 +29,7 @@ export default function ArtworkFrame({
     if (!imgUrl) return;
     mountedRef.current = true;
     setErrored(false);
+    setLoaded(false);
 
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -33,7 +37,9 @@ export default function ArtworkFrame({
       if (!mountedRef.current) return;
       const tex = new THREE.Texture(img);
       tex.needsUpdate = true;
+      textureRef.current = tex;
       setTexture(tex);
+      setLoaded(true);
     };
     img.onerror = () => {
       if (!mountedRef.current) return;
@@ -43,6 +49,10 @@ export default function ArtworkFrame({
 
     return () => {
       mountedRef.current = false;
+      if (textureRef.current) {
+        textureRef.current.dispose();
+        textureRef.current = null;
+      }
     };
   }, [imgUrl]);
 
@@ -56,8 +66,6 @@ export default function ArtworkFrame({
 
   const frameW = 1.8;
   const frameH = frameW / aspect;
-
-  const hasTexture = texture && !errored;
 
   return (
     <group position={position} rotation={rotation}>
@@ -77,11 +85,26 @@ export default function ArtworkFrame({
       <mesh position={[0, 0, 0.02]}>
         <planeGeometry args={[frameW, frameH]} />
         <meshStandardMaterial
-          color={errored ? "#2a2a2a" : "#1a1a1a"}
-          map={hasTexture ? texture : undefined}
+          color={errored ? "#161616" : loaded ? "#fff" : "#161616"}
+          map={texture || undefined}
           toneMapped={false}
         />
       </mesh>
+
+      {/* "Being restored" overlay */}
+      {errored && (
+        <Html center position={[0, 0, 0.05]} distanceFactor={4}>
+          <div className="text-center pointer-events-none select-none">
+            <div className="w-6 h-px bg-[#C8A96A]/30 mx-auto mb-2" />
+            <p className="text-[#B8B2A4] text-[10px] tracking-[0.08em] font-light uppercase whitespace-nowrap">
+              Being restored
+            </p>
+            <p className="text-[#555] text-[8px] tracking-[0.12em] font-light uppercase mt-1 whitespace-nowrap">
+              Please check back later
+            </p>
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
