@@ -4,10 +4,11 @@ import { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import MuseumLoading from "./MuseumLoading";
 import MuseumError from "./MuseumError";
+import PortalEntrance from "./PortalEntrance";
 
 const GalleryWorld = dynamic(() => import("./GalleryWorld"), { ssr: false });
 
-type Status = "loading" | "error" | "ready";
+type Status = "loading" | "portal" | "error" | "ready";
 
 function checkWebGL(): boolean {
   try {
@@ -20,7 +21,6 @@ function checkWebGL(): boolean {
 
 export default function TourShell() {
   const [status, setStatus] = useState<Status>("loading");
-  const [mount3D, setMount3D] = useState(false);
   const [diagnostics, setDiagnostics] = useState([
     { label: "WebGL", ok: false },
     { label: "Physics Engine", ok: false },
@@ -38,7 +38,6 @@ export default function TourShell() {
       return;
     }
 
-    // Simulate physics load
     const physicsTimer = setTimeout(() => {
       setDiagnostics((prev) =>
         prev.map((d) =>
@@ -47,24 +46,19 @@ export default function TourShell() {
       );
     }, 1500);
 
-    // Fetch gallery data to verify API works
     fetch("/api/gallery")
       .then((r) => r.json())
-      .then((data) => {
+      .then(() => {
         setDiagnostics((prev) =>
           prev.map((d) =>
             d.label === "Gallery Data" ? { ...d, ok: true } : d
           )
         );
       })
-      .catch(() => {
-        // API failed — still try to mount, just mark diagnostic
-      });
+      .catch(() => {});
 
-    // Mount 3D after loading phase
     const mountTimer = setTimeout(() => {
-      setMount3D(true);
-      setStatus("ready");
+      setStatus("portal");
     }, 3000);
 
     return () => {
@@ -73,19 +67,15 @@ export default function TourShell() {
     };
   }, []);
 
+  const handlePortalComplete = useCallback(() => {
+    setStatus("ready");
+  }, []);
+
   const handleRetry = useCallback(() => {
-    setStatus("loading");
-    setMount3D(false);
-    setDiagnostics([
-      { label: "WebGL", ok: false },
-      { label: "Physics Engine", ok: false },
-      { label: "Gallery Data", ok: false },
-    ]);
-    // Re-run the effect by forcing remount
     window.location.reload();
   }, []);
 
-  const handleError = useCallback(() => {
+  const handle3DError = useCallback(() => {
     setStatus("error");
   }, []);
 
@@ -97,22 +87,19 @@ export default function TourShell() {
     return <MuseumLoading />;
   }
 
-  if (!mount3D) {
-    return <MuseumLoading />;
+  if (status === "portal") {
+    return <PortalEntrance onComplete={handlePortalComplete} />;
   }
 
   return (
     <div className="w-screen h-screen relative">
-      {mount3D && (
-        <ErrorBoundaryBridge onError={handleError}>
-          <GalleryWorld />
-        </ErrorBoundaryBridge>
-      )}
+      <ErrorBoundaryBridge onError={handle3DError}>
+        <GalleryWorld />
+      </ErrorBoundaryBridge>
     </div>
   );
 }
 
-// Inline error boundary to catch 3D failures
 import { Component, ErrorInfo, ReactNode } from "react";
 
 class ErrorBoundaryBridge extends Component<{
