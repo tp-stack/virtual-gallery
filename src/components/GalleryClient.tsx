@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Grid as WindowGrid } from "react-window";
+import { AnimatePresence } from "framer-motion";
 import ArtworkCard from "./ArtworkCard";
 import ArtworkModal from "./ArtworkModal";
 import FilterBar from "./FilterBar";
@@ -18,6 +17,7 @@ export default function GalleryClient() {
   const [hasMore, setHasMore] = useState(true);
   const [movements, setMovements] = useState<{ movement: string; count: number }[]>([]);
   const pageRef = useRef(1);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const fetchPage = useCallback(
     async (pageNum: number, append: boolean) => {
@@ -65,40 +65,28 @@ export default function GalleryClient() {
     })();
   }, []);
 
-  const columnCount = 4;
-  const columnWidth = 310;
-  const rowHeight = 280;
-  const height = typeof window !== "undefined" ? window.innerHeight - 250 : 800;
-
-  const rowCount = Math.max(1, Math.ceil(Math.max(artworks.length, 1) / columnCount));
-
-  const handleItemsRendered = useCallback(
-    ({ visibleRowStopIndex }: any) => {
-      const lastVisibleItem = (visibleRowStopIndex + 1) * columnCount;
-      if (
-        lastVisibleItem >= artworks.length - columnCount &&
-        hasMore &&
-        !loading
-      ) {
-        pageRef.current += 1;
-        fetchPage(pageRef.current, true);
-      }
-    },
-    [artworks.length, hasMore, loading, fetchPage]
-  );
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    if (!sentinelRef.current || !hasMore || loading) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          pageRef.current += 1;
+          fetchPage(pageRef.current, true);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loading, fetchPage]);
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-8 max-w-[1440px] mx-auto">
       <div className="mb-16">
-        <p className="text-[#C8A96A] text-xs tracking-[0.16em] uppercase mb-3 font-light">
-          Browse
-        </p>
-        <h1 className="font-light text-5xl md:text-6xl text-[#F5F2EA] tracking-[-0.02em]">
-          The Collection
-        </h1>
-        <p className="text-[#B8B2A4] mt-4 text-sm font-light tracking-wide">
-          {total.toLocaleString()} works
-        </p>
+        <p className="text-[#C8A96A] text-xs tracking-[0.16em] uppercase mb-3 font-light">Browse</p>
+        <h1 className="font-light text-5xl md:text-6xl text-[#F5F2EA] tracking-[-0.02em]">The Collection</h1>
+        <p className="text-[#B8B2A4] mt-4 text-sm font-light tracking-wide">{total.toLocaleString()} works</p>
       </div>
 
       <div className="gold-line mb-10" />
@@ -115,42 +103,30 @@ export default function GalleryClient() {
 
       <div className="mt-10">
         {artworks.length > 0 ? (
-          <WindowGrid
-            height={height}
-            width={columnCount * columnWidth + 40}
-            columnCount={columnCount}
-            columnWidth={columnWidth}
-            rowCount={rowCount}
-            rowHeight={rowHeight}
-            onItemsRendered={handleItemsRendered}
-          >
-            {({ columnIndex, rowIndex, style }: any) => {
-              const index = rowIndex * columnCount + columnIndex;
-              if (index >= artworks.length) return null;
-              const art = artworks[index];
-              return (
-                <div style={style}>
-                  <ArtworkCard
-                    artwork={art}
-                    index={index}
-                    viewMode={viewMode}
-                    onClick={() => setSelected(art)}
-                  />
-                </div>
-              );
-            }}
-          </WindowGrid>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {artworks.map((art, i) => (
+              <ArtworkCard
+                key={art.id || i}
+                artwork={art}
+                index={i}
+                viewMode={viewMode}
+                onClick={() => setSelected(art)}
+              />
+            ))}
+          </div>
         ) : loading ? (
           <div className="text-center py-32">
             <div className="w-6 h-px bg-[#C8A96A]/40 mx-auto animate-pulse" />
           </div>
         ) : (
           <div className="text-center py-32">
-            <p className="text-[#B8B2A4] text-sm tracking-wide font-light">
-              No works found
-            </p>
+            <p className="text-[#B8B2A4] text-sm tracking-wide font-light">No works found</p>
           </div>
         )}
+
+        {/* Sentinel for infinite scroll */}
+        <div ref={sentinelRef} className="h-4" />
+
         {loading && artworks.length > 0 && (
           <div className="text-center py-6">
             <div className="w-5 h-px bg-[#C8A96A]/30 mx-auto animate-pulse" />
@@ -159,9 +135,7 @@ export default function GalleryClient() {
       </div>
 
       <AnimatePresence>
-        {selected && (
-          <ArtworkModal artwork={selected} onClose={() => setSelected(null)} />
-        )}
+        {selected && <ArtworkModal artwork={selected} onClose={() => setSelected(null)} />}
       </AnimatePresence>
     </div>
   );
