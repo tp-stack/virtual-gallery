@@ -70,22 +70,6 @@ export default function GalleryClient() {
   const rowHeight = 280;
   const height = typeof window !== "undefined" ? window.innerHeight - 250 : 800;
 
-  const Cell = ({ columnIndex, rowIndex, style }: any) => {
-    const index = rowIndex * columnCount + columnIndex;
-    if (index >= artworks.length) return null;
-    const art = artworks[index];
-    return (
-      <div style={style}>
-        <ArtworkCard
-          artwork={art}
-          index={index}
-          viewMode={viewMode}
-          onClick={() => setSelected(art)}
-        />
-      </div>
-    );
-  };
-
   const rowCount = Math.max(1, Math.ceil(Math.max(artworks.length, 1) / columnCount));
 
   const handleItemsRendered = useCallback(
@@ -140,7 +124,21 @@ export default function GalleryClient() {
             rowHeight={rowHeight}
             onItemsRendered={handleItemsRendered}
           >
-            {Cell}
+            {({ columnIndex, rowIndex, style }: any) => {
+              const index = rowIndex * columnCount + columnIndex;
+              if (index >= artworks.length) return null;
+              const art = artworks[index];
+              return (
+                <div style={style}>
+                  <ArtworkCard
+                    artwork={art}
+                    index={index}
+                    viewMode={viewMode}
+                    onClick={() => setSelected(art)}
+                  />
+                </div>
+              );
+            }}
           </WindowGrid>
         ) : loading ? (
           <div className="text-center py-32">
