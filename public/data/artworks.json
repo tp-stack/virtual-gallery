@@ -1,35 +1,8 @@
 {
   "gallery": {
     "name": "The Public Domain Masterpiece Gallery",
-    "rooms": 12,
+    "rooms": 11,
     "layout": [
-      {
-        "id": "room-0",
-        "name": "Grand Entrance",
-        "movement": "Foyer",
-        "artwork_ids": [],
-        "artwork_placements": [],
-        "style": {
-          "wall_color": "#1A1A1A",
-          "floor": "polished_concrete",
-          "lighting": "warm",
-          "ambience": "grand"
-        },
-        "dimensions": {
-          "width": 30,
-          "height": 5,
-          "depth": 10
-        },
-        "doorway": {
-          "width": 4,
-          "height": 3.5
-        },
-        "position": {
-          "x": 0,
-          "y": 0,
-          "z": -10
-        }
-      },
       {
         "id": "room-1",
         "name": "The Renaissance Wing",
@@ -43,31 +16,31 @@
           {
             "artwork_id": "mona-lisa",
             "position": {
-              "x": -7.0,
+              "x": 2,
               "y": 1.6,
-              "z": 6.0
+              "z": 5.0
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           },
           {
             "artwork_id": "birth-venus",
             "position": {
-              "x": -7.0,
+              "x": 28,
               "y": 1.6,
-              "z": 6.0
+              "z": 10.0
             },
-            "rotationY": 0,
+            "rotationY": -1.57,
             "side": "right"
           },
           {
             "artwork_id": "sistine-chapel",
             "position": {
-              "x": 0.0,
+              "x": 2,
               "y": 1.6,
-              "z": 6.0
+              "z": 15.0
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           }
         ],
@@ -104,21 +77,21 @@
           {
             "artwork_id": "starry-night",
             "position": {
-              "x": -5.25,
+              "x": 2,
               "y": 1.6,
-              "z": 26.0
+              "z": 26.67
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           },
           {
             "artwork_id": "sunday-la-grande-jatte",
             "position": {
-              "x": -5.25,
+              "x": 28,
               "y": 1.6,
-              "z": 26.0
+              "z": 33.33
             },
-            "rotationY": 0,
+            "rotationY": -1.57,
             "side": "right"
           }
         ],
@@ -156,31 +129,31 @@
           {
             "artwork_id": "girl-pearl-earring",
             "position": {
-              "x": -7.0,
+              "x": 2,
               "y": 1.6,
-              "z": 46.0
+              "z": 45.0
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           },
           {
             "artwork_id": "night-watch",
             "position": {
-              "x": -7.0,
+              "x": 28,
               "y": 1.6,
-              "z": 46.0
+              "z": 50.0
             },
-            "rotationY": 0,
+            "rotationY": -1.57,
             "side": "right"
           },
           {
             "artwork_id": "milkmaid",
             "position": {
-              "x": 0.0,
+              "x": 2,
               "y": 1.6,
-              "z": 46.0
+              "z": 55.0
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           }
         ],
@@ -216,11 +189,11 @@
           {
             "artwork_id": "great-wave",
             "position": {
-              "x": 0.0,
+              "x": 2,
               "y": 1.6,
-              "z": 66.0
+              "z": 70.0
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           }
         ],
@@ -257,21 +230,21 @@
           {
             "artwork_id": "liberty-leading",
             "position": {
-              "x": -5.25,
+              "x": 2,
               "y": 1.6,
-              "z": 86.0
+              "z": 86.67
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           },
           {
             "artwork_id": "wanderer-fog",
             "position": {
-              "x": -5.25,
+              "x": 28,
               "y": 1.6,
-              "z": 86.0
+              "z": 93.33
             },
-            "rotationY": 0,
+            "rotationY": -1.57,
             "side": "right"
           }
         ],
@@ -307,11 +280,11 @@
           {
             "artwork_id": "american-gothic",
             "position": {
-              "x": 0.0,
+              "x": 2,
               "y": 1.6,
-              "z": 106.0
+              "z": 110.0
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           }
         ],
@@ -347,11 +320,11 @@
           {
             "artwork_id": "nighthawks",
             "position": {
-              "x": 0.0,
+              "x": 2,
               "y": 1.6,
-              "z": 126.0
+              "z": 130.0
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           }
         ],
@@ -387,11 +360,11 @@
           {
             "artwork_id": "kiss-klimt",
             "position": {
-              "x": 0.0,
+              "x": 2,
               "y": 1.6,
-              "z": 146.0
+              "z": 150.0
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           }
         ],
@@ -427,11 +400,11 @@
           {
             "artwork_id": "persistence-memory",
             "position": {
-              "x": 0.0,
+              "x": 2,
               "y": 1.6,
-              "z": 166.0
+              "z": 170.0
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           }
         ],
@@ -468,21 +441,21 @@
           {
             "artwork_id": "water-lilies",
             "position": {
-              "x": -5.25,
+              "x": 2,
               "y": 1.6,
-              "z": 186.0
+              "z": 186.67
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           },
           {
             "artwork_id": "luncheon-boating",
             "position": {
-              "x": -5.25,
+              "x": 28,
               "y": 1.6,
-              "z": 186.0
+              "z": 193.33
             },
-            "rotationY": 0,
+            "rotationY": -1.57,
             "side": "right"
           }
         ],
@@ -518,11 +491,11 @@
           {
             "artwork_id": "scream",
             "position": {
-              "x": 0.0,
+              "x": 2,
               "y": 1.6,
-              "z": 206.0
+              "z": 210.0
             },
-            "rotationY": 0,
+            "rotationY": 1.57,
             "side": "left"
           }
         ],
@@ -548,7 +521,122 @@
         }
       }
     ],
-    "featured_artwork": "mona-lisa"
+    "featured_artwork": "mona-lisa",
+    "artwork_positions": {
+      "mona-lisa": {
+        "x": 2,
+        "y": 1.6,
+        "z": 5.0,
+        "rotY": 1.57
+      },
+      "birth-venus": {
+        "x": 28,
+        "y": 1.6,
+        "z": 10.0,
+        "rotY": -1.57
+      },
+      "sistine-chapel": {
+        "x": 2,
+        "y": 1.6,
+        "z": 15.0,
+        "rotY": 1.57
+      },
+      "starry-night": {
+        "x": 2,
+        "y": 1.6,
+        "z": 26.67,
+        "rotY": 1.57
+      },
+      "sunday-la-grande-jatte": {
+        "x": 28,
+        "y": 1.6,
+        "z": 33.33,
+        "rotY": -1.57
+      },
+      "girl-pearl-earring": {
+        "x": 2,
+        "y": 1.6,
+        "z": 45.0,
+        "rotY": 1.57
+      },
+      "night-watch": {
+        "x": 28,
+        "y": 1.6,
+        "z": 50.0,
+        "rotY": -1.57
+      },
+      "milkmaid": {
+        "x": 2,
+        "y": 1.6,
+        "z": 55.0,
+        "rotY": 1.57
+      },
+      "great-wave": {
+        "x": 2,
+        "y": 1.6,
+        "z": 70.0,
+        "rotY": 1.57
+      },
+      "liberty-leading": {
+        "x": 2,
+        "y": 1.6,
+        "z": 86.67,
+        "rotY": 1.57
+      },
+      "wanderer-fog": {
+        "x": 28,
+        "y": 1.6,
+        "z": 93.33,
+        "rotY": -1.57
+      },
+      "american-gothic": {
+        "x": 2,
+        "y": 1.6,
+        "z": 110.0,
+        "rotY": 1.57
+      },
+      "nighthawks": {
+        "x": 2,
+        "y": 1.6,
+        "z": 130.0,
+        "rotY": 1.57
+      },
+      "kiss-klimt": {
+        "x": 2,
+        "y": 1.6,
+        "z": 150.0,
+        "rotY": 1.57
+      },
+      "persistence-memory": {
+        "x": 2,
+        "y": 1.6,
+        "z": 170.0,
+        "rotY": 1.57
+      },
+      "water-lilies": {
+        "x": 2,
+        "y": 1.6,
+        "z": 186.67,
+        "rotY": 1.57
+      },
+      "luncheon-boating": {
+        "x": 28,
+        "y": 1.6,
+        "z": 193.33,
+        "rotY": -1.57
+      },
+      "scream": {
+        "x": 2,
+        "y": 1.6,
+        "z": 210.0,
+        "rotY": 1.57
+      }
+    },
+    "dimensions": {
+      "width": 30,
+      "height": 5,
+      "depth": 20
+    }
   },
   "artworks": [
     {
@@ -990,18 +1078,18 @@
     {
       "step": "curator_select",
       "detail": 18,
-      "timestamp": "2026-05-13T13:47:30.840069"
+      "timestamp": "2026-05-13T14:25:58.309804"
     },
     {
       "step": "compliance_and_enrich",
       "detail": 18,
-      "timestamp": "2026-05-13T13:47:30.842784"
+      "timestamp": "2026-05-13T14:25:58.309804"
     },
     {
       "step": "designer_arrange",
-      "detail": 12,
-      "timestamp": "2026-05-13T13:47:30.844540"
+      "detail": 11,
+      "timestamp": "2026-05-13T14:25:58.309804"
     }
   ],
-  "generated_at": "2026-05-13T13:47:30.844540"
+  "generated_at": "2026-05-13T14:25:58.309804"
 }
