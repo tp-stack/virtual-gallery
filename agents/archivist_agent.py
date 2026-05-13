@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 from typing import Any
 
 import httpx
@@ -14,7 +15,6 @@ AIC_SEARCH = "https://api.artic.edu/api/v1/artworks/search"
 class ArchivistAgent:
     def __init__(self):
         self.sem = asyncio.Semaphore(5)
-        self.client = httpx.AsyncClient(timeout=30.0)
 
     async def fetch_artworks(self, limit: int = 200) -> list[dict]:
         all_artworks: list[dict] = []
@@ -23,26 +23,26 @@ class ArchivistAgent:
         met_limit = limit // 2
         aic_limit = limit - met_limit
 
-        try:
-            met_results = await self._fetch_met(met_limit)
-            all_artworks.extend(met_results)
-            logger.info(f"Met Museum returned {len(met_results)} artworks")
-        except Exception as e:
-            logger.error(f"Met Museum API failed: {e}")
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            try:
+                met_results = await self._fetch_met(client, met_limit)
+                all_artworks.extend(met_results)
+                logger.info(f"Met Museum returned {len(met_results)} artworks")
+            except Exception as e:
+                logger.error(f"Met Museum API failed: {e}")
 
-        try:
-            aic_results = await self._fetch_aic(aic_limit)
-            all_artworks.extend(aic_results)
-            logger.info(f"Art Institute Chicago returned {len(aic_results)} artworks")
-        except Exception as e:
-            logger.error(f"AIC API failed: {e}")
+            try:
+                aic_results = await self._fetch_aic(client, aic_limit)
+                all_artworks.extend(aic_results)
+                logger.info(f"Art Institute Chicago returned {len(aic_results)} artworks")
+            except Exception as e:
+                logger.error(f"AIC API failed: {e}")
 
-        await self.client.aclose()
         return all_artworks
 
-    async def _fetch_met(self, limit: int) -> list[dict]:
+    async def _fetch_met(self, client: httpx.AsyncClient, limit: int) -> list[dict]:
         async with self.sem:
-            resp = await self.client.get(
+            resp = await client.get(
                 MET_SEARCH,
                 params={"q": "painting", "hasImages": True, "isPublicDomain": True},
             )
@@ -50,28 +50,27 @@ class ArchivistAgent:
             data = resp.json()
             object_ids = data.get("objectIDs", [])[:limit]
 
-        tasks = [self._fetch_met_object(oid) for oid in object_ids]
+        tasks = [self._fetch_met_object(client, oid) for oid in object_ids]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         return [r for r in results if isinstance(r, dict)]
 
-    async def _fetch_met_object(self, object_id: int) -> dict | None:
+    async def _fetch_met_object(self, client: httpx.AsyncClient, object_id: int) -> dict | None:
         async with self.sem:
             try:
-                resp = await self.client.get(f"{MET_OBJECT}/{object_id}")
+                resp = await client.get(f"{MET_OBJECT}/{object_id}")
                 resp.raise_for_status()
                 obj = resp.json()
             except Exception:
                 return None
 
-        title = obj.get("title", "").strip()
-        artist = obj.get("artistDisplayName", "").strip()
+        title = (obj.get("title") or "").strip()
+        artist = (obj.get("artistDisplayName") or "").strip()
         if not title or not artist:
             return None
 
         year_str = obj.get("objectDate", "")
         year = 0
         if year_str:
-            import re
             match = re.search(r"\d{3,4}", year_str)
             if match:
                 year = int(match.group())
@@ -81,10 +80,8 @@ class ArchivistAgent:
         if not image_small:
             image_small = image_hd
 
-        art_id = f"met-{object_id}"
-
         return {
-            "id": art_id,
+            "id": f"met-{object_id}",
             "title": title,
             "artist": artist,
             "year": year,
@@ -103,7 +100,7 @@ class ArchivistAgent:
             "highlight": False,
         }
 
-    async def _fetch_aic(self, limit: int) -> list[dict]:
+    async def _fetch_aic(self, client: httpx.AsyncClient, limit: int) -> list[dict]:
         all_artworks = []
         page = 1
         per_page = min(limit, 100)
@@ -111,7 +108,7 @@ class ArchivistAgent:
         while len(all_artworks) < limit:
             async with self.sem:
                 try:
-                    resp = await self.client.get(
+                    resp = await client.get(
                         AIC_SEARCH,
                         params={
                             "q": "painting",
@@ -148,15 +145,12 @@ class ArchivistAgent:
                 year_str = item.get("date_display", "")
                 year = 0
                 if year_str:
-                    import re
                     match = re.search(r"\d{3,4}", year_str)
                     if match:
                         year = int(match.group())
 
-                art_id = f"aic-{item['id']}"
-
                 all_artworks.append({
-                    "id": art_id,
+                    "id": f"aic-{item['id']}",
                     "title": title,
                     "artist": artist.split("\n")[0].strip() if "\n" in artist else artist,
                     "year": year,
