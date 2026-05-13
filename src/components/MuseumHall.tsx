@@ -9,26 +9,20 @@ export default function MuseumHall({
   room: any;
   isLast: boolean;
 }) {
-  const w = 30,
-    h = 5,
-    d = 20;
-  const zPos = room.position.z;
+  const w = room.width || 30;
+  const d = room.depth || 20;
+  const h = 5;
   const wallThickness = 0.5;
-
-  const floorColor =
-    room.movement === "Renaissance"
-      ? "#2a2a2a"
-      : room.movement === "Baroque"
-      ? "#1a1a1a"
-      : "#e2e2e2";
+  const zPos = room.position.z;
+  const xPos = room.position.x;
 
   return (
-    <group position={[0, 0, zPos]}>
+    <group position={[xPos, 0, zPos]}>
       {/* Floor */}
       <RigidBody type="fixed" colliders="cuboid">
         <mesh position={[w / 2, -0.25, d / 2]} receiveShadow>
           <boxGeometry args={[w, wallThickness, d]} />
-          <meshStandardMaterial color={floorColor} roughness={0.8} />
+          <meshStandardMaterial color="#1a1a1a" roughness={0.8} />
         </mesh>
       </RigidBody>
 
@@ -48,17 +42,15 @@ export default function MuseumHall({
         </mesh>
       </RigidBody>
 
-      {/* Back Wall (first room only) */}
-      {zPos === 0 && (
-        <RigidBody type="fixed" colliders="cuboid">
-          <mesh position={[w / 2, h / 2, 0]}>
-            <boxGeometry args={[w, h, wallThickness]} />
-            <meshStandardMaterial color="#111" />
-          </mesh>
-        </RigidBody>
-      )}
+      {/* Back Wall */}
+      <RigidBody type="fixed" colliders="cuboid">
+        <mesh position={[w / 2, h / 2, 0]}>
+          <boxGeometry args={[w, h, wallThickness]} />
+          <meshStandardMaterial color="#111" />
+        </mesh>
+      </RigidBody>
 
-      {/* Front Wall with Doorway (if not last room) */}
+      {/* Front Wall with Doorway */}
       {!isLast && (
         <>
           <RigidBody type="fixed" colliders="cuboid">
@@ -82,8 +74,7 @@ export default function MuseumHall({
         </>
       )}
 
-      {/* Room Spotlights */}
-      <pointLight position={[w / 2, h - 0.5, d / 2]} intensity={1} />
+      <pointLight position={[w / 2, h - 0.5, d / 2]} intensity={0.8} />
     </group>
   );
 }

@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { RigidBody, CuboidCollider } from "@react-three/rapier";
-import { Html } from "@react-three/drei";
+import { CuboidCollider } from "@react-three/rapier";
+import { Image, Html } from "@react-three/drei";
 
 export default function ArtworkFrame({
   artwork,
@@ -39,55 +39,55 @@ export default function ArtworkFrame({
     }
   });
 
-  const frameWidth = 3;
-  const frameDepth = 0.1;
-  const frameBorder = 0.15;
+  const aspect = (() => {
+    try {
+      const dims = (artwork.dimensions || "1x1").split("x").map((s: string) => parseFloat(s.trim()));
+      if (dims.length === 2 && dims[0] > 0 && dims[1] > 0) return dims[0] / dims[1];
+    } catch {}
+    return 1.4;
+  })();
+
+  const frameW = 1.8;
+  const frameH = frameW / aspect;
 
   return (
     <group position={position} rotation={rotation}>
       {/* Interaction Sensor */}
-      <RigidBody type="fixed" colliders={false}>
-        <CuboidCollider
-          args={[frameWidth / 2, 1.5, 1.5]}
-          position={[0, 0, -1.5]}
-          sensor
-          onIntersectionEnter={() => setInRange(true)}
-          onIntersectionExit={() => setInRange(false)}
-        />
-      </RigidBody>
+      <CuboidCollider
+        args={[1.5, 1.5, 1.5]}
+        position={[0, 0, -1.5]}
+        sensor
+        onIntersectionEnter={() => setInRange(true)}
+        onIntersectionExit={() => setInRange(false)}
+      />
 
       {/* Backboard */}
-      <mesh position={[0, 0, -frameDepth]}>
-        <boxGeometry
-          args={[frameWidth + frameBorder, 2 + frameBorder, frameDepth]}
-        />
-        <meshStandardMaterial color="#222" metalness={0.5} roughness={0.5} />
+      <mesh position={[0, 0, -0.05]}>
+        <boxGeometry args={[frameW + 0.1, frameH + 0.1, 0.1]} />
+        <meshStandardMaterial color={hovered ? "#333" : "#1a1a1a"} />
       </mesh>
 
-      {/* Painting surface */}
-      <mesh
+      {/* Gold frame border */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[frameW + 0.2, frameH + 0.2, 0.03]} />
+        <meshStandardMaterial color={hovered ? "#D4B96A" : "#8B7355"} metalness={0.6} roughness={0.3} />
+      </mesh>
+
+      {/* The Painting — uses drei <Image> for GPU memory management */}
+      <Image
+        url={artwork.image_url_3d}
+        position={[0, 0, 0.02]}
+        scale={[frameW, frameH]}
+        transparent
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
-      >
-        <planeGeometry args={[frameWidth, 2]} />
-        <meshStandardMaterial
-          color={hovered ? "#555" : "#333"}
-          emissive={hovered ? "#C9A84C" : "#000"}
-          emissiveIntensity={0.2}
-        />
-      </mesh>
-
-      {/* Gold plaque */}
-      <mesh position={[0, -1.3, -0.01]}>
-        <boxGeometry args={[0.8, 0.2, 0.02]} />
-        <meshStandardMaterial color="#C9A84C" metalness={0.8} roughness={0.2} />
-      </mesh>
+      />
 
       {/* Interaction Prompt */}
       {inRange && (
-        <Html center position={[0, -0.5, -1]} distanceFactor={5}>
-          <div className="bg-black/80 text-white px-3 py-1 rounded text-sm pointer-events-none whitespace-nowrap border border-gold-500/50">
-            [E] Inspect {artwork.title}
+        <Html center position={[0, -1, -1]} distanceFactor={5}>
+          <div className="bg-black/90 text-white px-3 py-1 rounded text-xs border border-gold-500/50 pointer-events-none whitespace-nowrap">
+            [E] Inspect {artwork.title?.slice(0, 40)}
           </div>
         </Html>
       )}

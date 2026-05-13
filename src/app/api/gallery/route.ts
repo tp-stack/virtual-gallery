@@ -4,16 +4,14 @@ import { getGalleryData } from "@/lib/data";
 export async function GET() {
   const data = getGalleryData();
 
-  // Transform to the flat format expected by the 3D GalleryWorld
   const rooms = data.gallery.layout.map((room) => ({
     id: room.id,
     name: room.name,
     movement: room.movement,
     artwork_ids: room.artwork_ids,
     position: room.position || { x: 0, y: 0, z: 0 },
-    style: room.style,
-    dimensions: room.dimensions || { width: 30, height: 5, depth: 20 },
-    doorway: room.doorway || { width: 4, height: 3.5 },
+    width: room.dimensions?.width || 30,
+    depth: room.dimensions?.depth || 20,
   }));
 
   const artworkPositions: Record<string, { x: number; y: number; z: number; rotY: number }> = {};
@@ -33,6 +31,5 @@ export async function GET() {
     rooms,
     artworks: data.artworks,
     artwork_positions: artworkPositions,
-    dimensions: { width: 30, height: 5, depth: 20 },
   });
 }

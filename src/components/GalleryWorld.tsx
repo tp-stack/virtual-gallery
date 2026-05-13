@@ -8,11 +8,11 @@ import MuseumHall from "./MuseumHall";
 import Player from "./Player";
 import ArtworkFrame from "./ArtworkFrame";
 import ArtworkModal from "./ArtworkModal";
+
 type GalleryData = {
   rooms: any[];
   artworks: any[];
   artwork_positions: Record<string, { x: number; y: number; z: number; rotY: number }>;
-  dimensions: { width: number; height: number; depth: number };
 };
 
 export default function GalleryWorld() {
@@ -38,8 +38,8 @@ export default function GalleryWorld() {
 
   return (
     <div className="w-screen h-screen relative bg-gallery-900">
-      <Canvas shadows camera={{ fov: 75, near: 0.1, far: 200 }}>
-        <fog attach="fog" args={["#0A0A0A", 10, 80]} />
+      <Canvas shadows camera={{ fov: 75, near: 0.1, far: 250 }}>
+        <fog attach="fog" args={["#0A0A0A", 10, 120]} />
         <ambientLight intensity={0.2} />
 
         <Suspense fallback={null}>
@@ -49,7 +49,10 @@ export default function GalleryWorld() {
             {data.rooms.map((room, i) => (
               <MuseumHall
                 key={room.id}
-                room={room}
+                room={{
+                  ...room,
+                  dimensions: { width: room.width || 30, depth: room.depth || 20 },
+                }}
                 isLast={i === data.rooms.length - 1}
               />
             ))}
@@ -81,7 +84,13 @@ export default function GalleryWorld() {
 
       {selectedArt && (
         <div className="absolute inset-0 z-20">
-          <ArtworkModal artwork={selectedArt} onClose={() => setSelectedArt(null)} />
+          <ArtworkModal
+            artwork={{
+              ...selectedArt,
+              image_url: selectedArt.image_url_hd || selectedArt.image_url,
+            }}
+            onClose={() => setSelectedArt(null)}
+          />
         </div>
       )}
     </div>
