@@ -5,3 +5,5 @@ __pycache__
 .vercel
 dev_out.log
 dev_err.log
+
+.github/workflows/archive-worker.yml
