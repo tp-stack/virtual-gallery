@@ -10,33 +10,18 @@ const ROOM_DEPTH = 20;
 export async function GET() {
   const supabase = getSupabaseClient();
   if (supabase) {
-    // Get count of artworks with room_ids (exact, not limited to 1000 rows)
-    const { count, error: countError } = await supabase
+    const { data: roomData, error } = await supabase
       .from("artworks")
-      .select("*", { count: "exact", head: true })
-      .not("room_id", "is", null);
+      .select("room_id")
+      .not("room_id", "is", null)
+      .order("room_id");
 
-    if (!countError && count) {
-      // Approximate rooms: 10 artworks per room
-      const estimatedRooms = Math.ceil(count / 10);
+    if (!error && roomData && roomData.length > 0) {
+      const roomIds = Array.from(new Set(roomData.map((r: any) => r.room_id))).sort(
+        (a: any, b: any) => a - b
+      );
 
-      // Get the first 1000 rows of room data for the lower rooms
-      const { data: roomData } = await supabase
-        .from("artworks")
-        .select("room_id")
-        .not("room_id", "is", null)
-        .order("room_id");
-
-      const roomIds = new Set((roomData || []).map((r: any) => r.room_id));
-
-      // Estimate missing rooms from the count
-      for (let r = 0; r < estimatedRooms; r++) {
-        roomIds.add(r);
-      }
-
-      const sortedIds = Array.from(roomIds).sort((a: any, b: any) => a - b);
-
-      const rooms = sortedIds.map((rid: any) => ({
+      const rooms = roomIds.map((rid: any) => ({
         id: `room-${rid}`,
         room_id: rid,
         position: { x: (rid % 3) * ROOM_WIDTH, y: 0, z: Math.floor(rid / 3) * (ROOM_DEPTH + 2) },
