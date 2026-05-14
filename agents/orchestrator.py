@@ -8,6 +8,7 @@ from typing import Any
 from curator_agent import CuratorAgent
 from content_agent import ContentAgent
 from compliance_agent import ComplianceAgent
+from categorizer_agent import CategorizerAgent
 from designer_agent import DesignerAgent
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
@@ -21,6 +22,7 @@ class Orchestrator:
         self.curator = CuratorAgent()
         self.content = ContentAgent()
         self.compliance = ComplianceAgent()
+        self.categorizer = CategorizerAgent()
         self.designer = DesignerAgent()
         self.pipeline_log: list[dict] = []
 
@@ -37,8 +39,9 @@ class Orchestrator:
                 logger.warning(f"Rejected: {artwork.get('title','?')} {result['reason']}")
                 return None
             enriched = await self.content.enrich(artwork)
-            enriched["compliance"] = result
-            return enriched
+            categorized = await self.categorizer.categorize(enriched)
+            categorized["compliance"] = result
+            return categorized
 
         tasks = [verify_and_enrich(art) for art in raw_artworks]
         results = await asyncio.gather(*tasks)

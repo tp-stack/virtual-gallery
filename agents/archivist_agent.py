@@ -15,6 +15,7 @@ logger = logging.getLogger("ArchivistAgent")
 MET_SEARCH = "https://collectionapi.metmuseum.org/public/collection/v1/search"
 MET_OBJECT = "https://collectionapi.metmuseum.org/public/collection/v1/objects"
 AIC_SEARCH = "https://api.artic.edu/api/v1/artworks/search"
+CLEVELAND_API = "https://openaccess-api.clevelandart.org/api/artworks"
 
 ROOM_WIDTH = 30
 ROOM_DEPTH = 20
@@ -65,6 +66,13 @@ class ArchivistAgent:
             logger.info(f"AIC: {len(aic_results)} artworks")
         except Exception as e:
             logger.error(f"AIC API failed: {e}")
+
+        try:
+            cleveland_results = await self._fetch_cleveland(limit // 3)
+            all_artworks.extend(cleveland_results)
+            logger.info(f"Cleveland Museum: {len(cleveland_results)} artworks")
+        except Exception as e:
+            logger.error(f"Cleveland API failed: {e}")
 
         now = datetime.now(timezone.utc).isoformat()
         for i, art in enumerate(all_artworks):
@@ -205,5 +213,69 @@ class ArchivistAgent:
                     "audio_narration": "", "tags": [], "highlight": False, "source_api": "aic",
                 })
             page += 1
+
+        return all_rows
+
+    async def _fetch_cleveland(self, limit: int) -> list[dict]:
+        logger.info(f"Fetching up to {limit} from Cleveland Museum of Art")
+        all_rows = []
+        skip = 0
+        per_page = 100
+        loop = asyncio.get_event_loop()
+
+        while len(all_rows) < limit:
+            url = f"{CLEVELAND_API}?has_image=1&limit={per_page}&skip={skip}"
+            async with self.sem:
+                try:
+                    data = await loop.run_in_executor(executor, _fetch_json, url)
+                except Exception:
+                    break
+
+            results = data.get("data", [])
+            if not results:
+                break
+
+            for item in results:
+                if len(all_rows) >= limit:
+                    break
+                title = (item.get("title") or "").strip()
+                if not title:
+                    continue
+
+                creators = item.get("creators", [])
+                artist = creators[0].get("description", "").strip() if creators else ""
+                if not artist:
+                    continue
+
+                image_url = ""
+                images = item.get("images", {})
+                if images:
+                    web = images.get("web", {})
+                    if web:
+                        image_url = web.get("url", "")
+                    if not image_url:
+                        image_url = images.get("print", {}).get("url", "")
+                if not image_url:
+                    continue
+
+                year_str = item.get("creation_date", "")
+                year = 0
+                if year_str:
+                    match = re.search(r"\d{3,4}", str(year_str))
+                    if match:
+                        year = int(match.group())
+
+                art_id = f"cleveland-{item.get('id', skip + len(all_rows))}"
+                all_rows.append({
+                    "source_id": art_id, "id": art_id, "title": title,
+                    "artist": artist, "year": year,
+                    "movement": item.get("culture", ""), "origin": item.get("creditline", ""),
+                    "medium": item.get("technique", ""), "museum": "Cleveland Museum of Art",
+                    "image_url": image_url, "image_url_3d": image_url, "image_url_hd": image_url,
+                    "dimensions": item.get("measurements", ""), "description": "",
+                    "description_long": item.get("description", ""),
+                    "audio_narration": "", "tags": [], "highlight": False, "source_api": "cleveland",
+                })
+            skip += per_page
 
         return all_rows
