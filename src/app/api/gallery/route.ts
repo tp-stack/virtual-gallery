@@ -12,7 +12,8 @@ export async function GET() {
       .from("artworks")
       .select("room_id")
       .not("room_id", "is", null)
-      .order("room_id");
+      .order("room_id")
+      .limit(100000);
 
     if (!error && roomData && roomData.length > 0) {
       const roomIds = Array.from(new Set(roomData.map((r: any) => r.room_id))).sort(
