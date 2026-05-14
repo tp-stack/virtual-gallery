@@ -160,7 +160,7 @@ class ArchivistAgent:
 
         while len(all_rows) < limit:
             params = urllib.parse.urlencode({
-                "q": "painting", "query[term][is_public_domain]": True,
+                "q": "painting", "query[term][is_public_domain]": "true",
                 "limit": per_page, "page": page,
                 "fields": "id,title,artist_display,image_id,date_display,medium_display,department_title,dimensions,credit_line,place_of_origin",
             })

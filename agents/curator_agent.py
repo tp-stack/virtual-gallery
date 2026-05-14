@@ -89,7 +89,7 @@ class CuratorAgent:
     def __init__(self):
         self.archivist = ArchivistAgent()
 
-    async def select_artworks(self, api_limit: int = 200) -> list[dict]:
+    async def select_artworks(self, api_limit: int = 2000) -> list[dict]:
         logger.info(f"Curator: archivist fetching {api_limit} artworks from APIs")
         api_works = await self.archivist.fetch_artworks(limit=api_limit)
         combined = CORE_MASTERPIECES.copy() + api_works
