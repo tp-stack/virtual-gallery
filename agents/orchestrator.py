@@ -15,7 +15,7 @@ logger = logging.getLogger("Orchestrator")
 
 
 class Orchestrator:
-    def __init__(self, output_path: str = "../public/data"):
+    def __init__(self, output_path: str = "public/data"):
         self.output_path = Path(output_path)
         self.output_path.mkdir(parents=True, exist_ok=True)
         self.curator = CuratorAgent()

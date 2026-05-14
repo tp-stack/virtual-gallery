@@ -17,7 +17,7 @@ if not DATA_PATH.exists():
     print(f"ERROR: {DATA_PATH} not found. Run orchestrator.py first.")
     sys.exit(1)
 
-with open(DATA_PATH) as f:
+with open(DATA_PATH, encoding="utf-8") as f:
     data = json.load(f)
 
 artworks = data.get("artworks", [])
@@ -40,9 +40,13 @@ for i in range(0, len(artworks), BATCH_SIZE):
     batch = artworks[i : i + BATCH_SIZE]
     rows = []
     for art in batch:
-        pos = positions.get(art.get("source_id") or art.get("id"), {})
+        aid = art.get("source_id") or art.get("id")
+        pos = positions.get(aid, {})
+        z = pos.get("z")
+        room_id = int(z / 22) if z is not None else None
+
         row = {
-            "source_id": art.get("source_id") or art.get("id"),
+            "source_id": aid,
             "title": art.get("title", ""),
             "artist": art.get("artist", ""),
             "year": art.get("year", 0),
@@ -60,9 +64,9 @@ for i in range(0, len(artworks), BATCH_SIZE):
             "highlight": art.get("highlight", False),
             "position_x": pos.get("x"),
             "position_y": pos.get("y", 1.6),
-            "position_z": pos.get("z"),
+            "position_z": z,
             "rotation_y": pos.get("rotY"),
-            "room_id": art.get("room_id"),
+            "room_id": room_id,
             "source_api": art.get("source_api", ""),
         }
         rows.append(row)
@@ -70,7 +74,9 @@ for i in range(0, len(artworks), BATCH_SIZE):
     url = f"{SUPABASE_URL}/rest/v1/artworks"
     resp = client.post(url, headers=headers, json=rows)
     if resp.status_code in (200, 201):
-        print(f"  Batch {i//BATCH_SIZE + 1}: {len(rows)} rows inserted")
+        print(f"  Batch {i//BATCH_SIZE + 1}: {len(rows)} rows upserted")
+    elif resp.status_code == 409:
+        print(f"  Batch {i//BATCH_SIZE + 1}: {len(rows)} rows (duplicates skipped)")
     else:
         print(f"  Batch {i//BATCH_SIZE + 1}: ERROR {resp.status_code} - {resp.text[:200]}")
 
