@@ -8,12 +8,13 @@ export async function GET() {
   // Try Supabase first
   const supabase = getSupabaseClient();
   if (supabase) {
+    // Use distinct count via aggregation by fetching all room_ids
     const { data: roomData, error } = await supabase
       .from("artworks")
       .select("room_id")
       .not("room_id", "is", null)
       .order("room_id")
-      .limit(100000);
+      .range(0, 100000);
 
     if (!error && roomData && roomData.length > 0) {
       const roomIds = Array.from(new Set(roomData.map((r: any) => r.room_id))).sort(
