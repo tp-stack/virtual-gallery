@@ -16,6 +16,7 @@ MET_SEARCH = "https://collectionapi.metmuseum.org/public/collection/v1/search"
 MET_OBJECT = "https://collectionapi.metmuseum.org/public/collection/v1/objects"
 AIC_SEARCH = "https://api.artic.edu/api/v1/artworks/search"
 CLEVELAND_API = "https://openaccess-api.clevelandart.org/api/artworks"
+VAM_API = "https://api.vam.ac.uk/v2/objects/search"
 
 ROOM_WIDTH = 30
 ROOM_DEPTH = 20
@@ -73,6 +74,13 @@ class ArchivistAgent:
             logger.info(f"Cleveland Museum: {len(cleveland_results)} artworks")
         except Exception as e:
             logger.error(f"Cleveland API failed: {e}")
+
+        try:
+            vam_results = await self._fetch_vam(limit // 3)
+            all_artworks.extend(vam_results)
+            logger.info(f"V&A Museum: {len(vam_results)} artworks")
+        except Exception as e:
+            logger.error(f"V&A API failed: {e}")
 
         now = datetime.now(timezone.utc).isoformat()
         for i, art in enumerate(all_artworks):
@@ -277,5 +285,69 @@ class ArchivistAgent:
                     "audio_narration": "", "tags": [], "highlight": False, "source_api": "cleveland",
                 })
             skip += per_page
+
+        return all_rows
+
+    async def _fetch_vam(self, limit: int) -> list[dict]:
+        logger.info(f"Fetching up to {limit} from Victoria & Albert Museum")
+        all_rows = []
+        page = 1
+        per_page = 100
+        loop = asyncio.get_event_loop()
+
+        while len(all_rows) < limit:
+            url = f"{VAM_API}?images_exists=true&page_size={per_page}&page={page}"
+            async with self.sem:
+                try:
+                    data = await loop.run_in_executor(executor, _fetch_json, url)
+                except Exception:
+                    break
+
+            records = data.get("records", [])
+            if not records:
+                break
+
+            for item in records:
+                if len(all_rows) >= limit:
+                    break
+                title = (item.get("_primaryTitle") or item.get("_primaryMaker", {}).get("name", "") or "Untitled").strip()
+                if not title:
+                    continue
+                maker = item.get("_primaryMaker", {}) or {}
+                artist = (maker.get("name") or "").strip()
+                if not artist:
+                    continue
+                images = item.get("_images", {}) or {}
+                thumbnail = images.get("_primary_thumbnail", "")
+                if not thumbnail:
+                    continue
+                image_url = thumbnail.replace("/!100,100/", "/!800,800/")
+
+                year_str = item.get("_primaryDate", "") or ""
+                year = 0
+                if year_str:
+                    match = re.search(r"\d{3,4}", str(year_str))
+                    if match:
+                        year = int(match.group())
+
+                art_id = f"vam-{item.get('systemNumber', page * per_page + len(all_rows))}"
+                place = item.get("_primaryPlace") or {}
+                movement = place.get("name", "Unknown") if isinstance(place, dict) else str(place)
+                maker = item.get("_primaryMaker") or {}
+                origin = maker.get("placeOfBirth", "") if isinstance(maker, dict) else ""
+                material = item.get("_primaryMaterial") or {}
+                medium = material.get("name", "") if isinstance(material, dict) else str(material)
+                all_rows.append({
+                    "source_id": art_id, "id": art_id, "title": title,
+                    "artist": artist, "year": year,
+                    "movement": movement, "origin": origin, "medium": medium,
+                    "museum": "Victoria & Albert Museum",
+                    "image_url": image_url, "image_url_3d": image_url, "image_url_hd": image_url,
+                    "dimensions": "", "description": "", "description_long": "",
+                    "audio_narration": "", "tags": [], "highlight": False, "source_api": "vam",
+                })
+            page += 1
+            # Be nice to V&A API
+            await asyncio.sleep(0.3)
 
         return all_rows
