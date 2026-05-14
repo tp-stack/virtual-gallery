@@ -37,7 +37,7 @@ export default function ArtworkCard({
           }`}
         >
           <img
-            src={artwork.image_url}
+            src={artwork.image_url || artwork.image_url_3d || artwork.image_url_hd}
             alt={artwork.title}
             className="artwork-img w-full h-full object-cover"
             loading="lazy"

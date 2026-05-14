@@ -121,7 +121,7 @@ export default function HomeClient({
                 <div className="plaque group overflow-hidden">
                   <div className="relative aspect-[3/4] overflow-hidden rounded-t-[12px]">
                     <img
-                      src={art.image_url}
+                      src={art.image_url || art.image_url_3d || art.image_url_hd}
                       alt={art.title}
                       className="artwork-img w-full h-full object-cover"
                       loading="lazy"
