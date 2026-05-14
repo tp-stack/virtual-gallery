@@ -7,7 +7,8 @@ const dataPath = path.join(__dirname, "..", "public", "data", "artworks.json");
 if (fs.existsSync(dataPath)) {
   const stats = fs.statSync(dataPath);
   if (stats.size > 1000) {
-    console.log(`[ensure-data] artworks.json exists (${stats.size} bytes), skipping Python pipeline`);
+    const mb = (stats.size / 1024 / 1024).toFixed(1);
+    console.log(`[ensure-data] artworks.json exists (${mb} MB), skipping Python pipeline`);
     process.exit(0);
   }
 }
@@ -21,8 +22,8 @@ try {
   });
   console.log("[ensure-data] Pipeline complete");
 } catch (err) {
-  console.warn("[ensure-data] Python pipeline failed (expected on Vercel build):", err.message);
+  console.warn("[ensure-data] Python pipeline failed:", err.message);
   if (!fs.existsSync(dataPath) || fs.statSync(dataPath).size < 100) {
-    console.error("[ensure-data] No valid artworks.json found. Deploying with minimal data.");
+    console.error("[ensure-data] No valid artworks.json found.");
   }
 }

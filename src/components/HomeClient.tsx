@@ -1,16 +1,44 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import type { Artwork, Gallery } from "@/lib/data";
 
-export default function HomeClient({
-  artworks,
-  gallery,
-}: {
-  artworks: Artwork[];
-  gallery: Gallery;
-}) {
+export default function HomeClient() {
+  const [artworks, setArtworks] = useState<any[]>([]);
+  const [gallery, setGallery] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/artworks?limit=20").then((r) => r.json()),
+      fetch("/api/gallery").then((r) => r.json()),
+    ])
+      .then(([artRes, galRes]) => {
+        const arts = artRes.data || [];
+        setArtworks(arts);
+
+        if (galRes && galRes.rooms) {
+          setGallery({
+            name: "The Public Domain Masterpiece Gallery",
+            rooms: galRes.total_rooms || galRes.rooms.length || 0,
+            layout: (galRes.rooms || []).slice(0, 12).map((r: any) => ({
+              id: r.id,
+              name: `Room ${r.room_id}`,
+              movement: "",
+              artwork_ids: [],
+              style: { wall_color: "#1E1E1E", floor: "concrete", lighting: "warm", ambience: "modern" },
+              dimensions: { width: r.width || 30, height: 5, depth: r.depth || 20 },
+              position: r.position || { x: 0, y: 0, z: 0 },
+            })),
+            featured_artwork: arts[0]?.id || "",
+          });
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
   const featured = artworks.filter((a: any) => a.highlight).slice(0, 6);
 
   return (
@@ -69,11 +97,11 @@ export default function HomeClient({
             className="mt-24 flex justify-center gap-16 text-center"
           >
             <div>
-              <p className="text-3xl font-thin text-[#F5F2EA]">{artworks.length}</p>
+              <p className="text-3xl font-thin text-[#F5F2EA]">{loading ? "..." : artworks.length}</p>
               <p className="text-[#B8B2A4] text-xs tracking-[0.12em] uppercase mt-2 font-light">Works</p>
             </div>
             <div>
-              <p className="text-3xl font-thin text-[#F5F2EA]">{gallery.rooms}</p>
+              <p className="text-3xl font-thin text-[#F5F2EA]">{loading ? "..." : gallery?.rooms || 0}</p>
               <p className="text-[#B8B2A4] text-xs tracking-[0.12em] uppercase mt-2 font-light">Galleries</p>
             </div>
             <div>
@@ -108,54 +136,55 @@ export default function HomeClient({
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featured.map((art: any, i: number) => (
-            <motion.div
-              key={art.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-            >
-              <Link href={`/artwork/${art.id}`}>
-                <div className="plaque group overflow-hidden">
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-t-[12px]">
-                    <img
-                      src={art.image_url || art.image_url_3d || art.image_url_hd}
-                      alt={art.title}
-                      className="artwork-img w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
-                    <div className="absolute top-4 right-4 px-3 py-1.5 border border-[#C8A96A]/30 text-[#C8A96A] text-[10px] tracking-[0.1em] uppercase rounded-full font-light">
-                      Featured
+        {!loading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featured.map((art: any, i: number) => (
+              <motion.div
+                key={art.id}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
+                <Link href={`/artwork/${art.id}`}>
+                  <div className="plaque group overflow-hidden">
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-t-[12px]">
+                      <img
+                        src={art.image_url || art.image_url_3d || art.image_url_hd}
+                        alt={art.title}
+                        className="artwork-img w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
+                      <div className="absolute top-4 right-4 px-3 py-1.5 border border-[#C8A96A]/30 text-[#C8A96A] text-[10px] tracking-[0.1em] uppercase rounded-full font-light">
+                        Featured
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <p className="text-[#B8B2A4] text-xs tracking-[0.12em] uppercase mb-1 font-light">{art.movement}</p>
+                      <h3 className="font-light text-lg text-[#F5F2EA] group-hover:text-[#C8A96A] transition-colors duration-500">
+                        {art.title}
+                      </h3>
+                      <p className="text-[#B8B2A4] text-sm mt-1 font-light">
+                        {art.artist}, <span className="text-[#8FA3B8]">{art.year}</span>
+                      </p>
                     </div>
                   </div>
-                  <div className="p-6">
-                    <p className="text-[#B8B2A4] text-xs tracking-[0.12em] uppercase mb-1 font-light">{art.movement}</p>
-                    <h3 className="font-light text-lg text-[#F5F2EA] group-hover:text-[#C8A96A] transition-colors duration-500">
-                      {art.title}
-                    </h3>
-                    <p className="text-[#B8B2A4] text-sm mt-1 font-light">
-                      {art.artist}, <span className="text-[#8FA3B8]">{art.year}</span>
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ─── ROOMS ─── */}
-      {gallery.layout && (
+      {gallery?.layout && (
         <section className="py-32 px-8 max-w-[1440px] mx-auto">
           <div className="gold-line mb-16" />
           <p className="text-[#C8A96A] tracking-[0.16em] text-xs font-light mb-3 uppercase">Explore</p>
           <h2 className="font-light text-4xl md:text-5xl text-[#F5F2EA] mb-16 tracking-[-0.02em]">
             Gallery Wings
           </h2>
-
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {gallery.layout.map((room: any, i: number) => (
               <motion.div
@@ -169,14 +198,10 @@ export default function HomeClient({
                 <h3 className="font-light text-base text-[#F5F2EA] group-hover:text-[#C8A96A] transition-colors duration-500">
                   {room.name}
                 </h3>
-                <p className="text-[#B8B2A4] text-xs mt-2 font-light tracking-wide">
-                  {room.artwork_ids.length} works
-                </p>
+                <p className="text-[#B8B2A4] text-xs mt-2 font-light tracking-wide">View works</p>
                 <div className="flex items-center gap-2 mt-4">
                   <div className="w-px h-3 bg-[#C8A96A]/40" />
-                  <span className="text-[#B8B2A4] text-2xs font-light capitalize">
-                    {room.style?.ambience || "museum"}
-                  </span>
+                  <span className="text-[#B8B2A4] text-2xs font-light capitalize">Museum</span>
                 </div>
               </motion.div>
             ))}
