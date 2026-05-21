@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import math
+import os
 import re
 import time
 import urllib.parse
@@ -17,12 +18,23 @@ MET_OBJECT = "https://collectionapi.metmuseum.org/public/collection/v1/objects"
 AIC_SEARCH = "https://api.artic.edu/api/v1/artworks/search"
 CLEVELAND_API = "https://openaccess-api.clevelandart.org/api/artworks"
 VAM_API = "https://api.vam.ac.uk/v2/objects/search"
+EUROPEANA_API = "https://api.europeana.eu/record/v2/search.json"
+EUROPEANA_KEY = os.environ.get("EUROPEANA_API_KEY", "baramboa")
+WELLCOME_API = "https://api.wellcomecollection.org/catalogue/v2/works"
+FINNA_API = "https://api.finna.fi/v1/search"
+SWEDEN_API = "https://api.nationalmuseum.se/api/objects"
+SMK_API = "https://api.smk.dk/api/v1/art"
+RIJKSMUSEUM_API = "https://www.rijksmuseum.nl/api/en/collection"
+HARVARD_API = "https://api.harvardartmuseums.org/object"
+SMITHSONIAN_API = "https://api.si.edu/openaccess/api/v1.0/search"
+GETTY_API = "https://data.getty.edu/museum/collection/object"
+WIKIMEDIA_API = "https://commons.wikimedia.org/w/api.php"
 
 ROOM_WIDTH = 30
 ROOM_DEPTH = 20
 MAX_PER_ROOM = 10
 
-executor = ThreadPoolExecutor(max_workers=10)
+executor = ThreadPoolExecutor(max_workers=20)
 
 
 def _compute_position(artwork_index: int) -> tuple:
@@ -45,7 +57,7 @@ def _fetch_json(url: str, timeout: int = 15) -> dict:
 
 class ArchivistAgent:
     def __init__(self):
-        self.sem = asyncio.Semaphore(10)
+        self.sem = asyncio.Semaphore(20)
 
     async def fetch_artworks(self, limit: int = 200) -> list[dict]:
         all_artworks = self._core_artworks()
@@ -81,6 +93,34 @@ class ArchivistAgent:
             logger.info(f"V&A Museum: {len(vam_results)} artworks")
         except Exception as e:
             logger.error(f"V&A API failed: {e}")
+
+        try:
+            europeana_results = await self._fetch_europeana(limit // 4)
+            all_artworks.extend(europeana_results)
+            logger.info(f"Europeana: {len(europeana_results)} artworks")
+        except Exception as e:
+            logger.error(f"Europeana API failed: {e}")
+
+        try:
+            wellcome_results = await self._fetch_wellcome(limit // 4)
+            all_artworks.extend(wellcome_results)
+            logger.info(f"Wellcome Collection: {len(wellcome_results)} artworks")
+        except Exception as e:
+            logger.error(f"Wellcome API failed: {e}")
+
+        try:
+            finna_results = await self._fetch_finna(limit // 4)
+            all_artworks.extend(finna_results)
+            logger.info(f"Finna: {len(finna_results)} artworks")
+        except Exception as e:
+            logger.error(f"Finna API failed: {e}")
+
+        try:
+            wikimedia_results = await self._fetch_wikimedia(limit // 4)
+            all_artworks.extend(wikimedia_results)
+            logger.info(f"Wikimedia Commons: {len(wikimedia_results)} artworks")
+        except Exception as e:
+            logger.error(f"Wikimedia API failed: {e}")
 
         now = datetime.now(timezone.utc).isoformat()
         for i, art in enumerate(all_artworks):
@@ -347,7 +387,230 @@ class ArchivistAgent:
                     "audio_narration": "", "tags": [], "highlight": False, "source_api": "vam",
                 })
             page += 1
-            # Be nice to V&A API
-            await asyncio.sleep(0.3)
+
+        return all_rows
+
+    async def _fetch_europeana(self, limit: int) -> list[dict]:
+        logger.info(f"Fetching up to {limit} from Europeana")
+        all_rows = []
+        page = 1
+        per_page = 100
+        loop = asyncio.get_event_loop()
+
+        while len(all_rows) < limit:
+            start = (page - 1) * per_page + 1
+            url = f"{EUROPEANA_API}?query=painting&rows={per_page}&start={start}&wskey={EUROPEANA_KEY}"
+            async with self.sem:
+                try:
+                    data = await loop.run_in_executor(executor, _fetch_json, url)
+                except Exception:
+                    break
+
+            items = data.get("items", [])
+            if not items:
+                break
+
+            for item in items:
+                if len(all_rows) >= limit:
+                    break
+                titles = item.get("title", [])
+                title = titles[0] if titles else ""
+                if not title:
+                    continue
+                creators = item.get("dcCreator", []) or item.get("edmAgentLabel", []) or item.get("edmDataProvider", []) or []
+                artist = creators[0] if creators else "Unknown"
+                if artist == "Unknown":
+                    continue
+                previews = item.get("edmPreview", [])
+                image_url = previews[0] if previews else ""
+                if not image_url:
+                    continue
+                year_str = item.get("year", [None])[0] if item.get("year") else ""
+                year = 0
+                if year_str:
+                    match = re.search(r"\d{3,4}", str(year_str))
+                    if match:
+                        year = int(match.group())
+                item_id = item.get("id", "").split("/")[-1] or str(page * per_page + len(all_rows))
+                all_rows.append({
+                    "source_id": f"europeana-{item_id}", "id": f"europeana-{item_id}", "title": title,
+                    "artist": artist, "year": year,
+                    "movement": "", "origin": "", "medium": "",
+                    "museum": "Europeana",
+                    "image_url": image_url, "image_url_3d": image_url, "image_url_hd": image_url,
+                    "dimensions": "", "description": "",
+                    "description_long": (item.get("edmDataProvider", [""])[0] if item.get("edmDataProvider") else ""),
+                    "audio_narration": "", "tags": [], "highlight": False, "source_api": "europeana",
+                })
+            page += 1
+
+        return all_rows
+
+    async def _fetch_wellcome(self, limit: int) -> list[dict]:
+        logger.info(f"Fetching up to {limit} from Wellcome Collection")
+        all_rows = []
+        page = 1
+        per_page = 100
+        loop = asyncio.get_event_loop()
+
+        while len(all_rows) < limit:
+            url = f"{WELLCOME_API}?query=painting&images=true&pageSize={per_page}&page={page}"
+            async with self.sem:
+                try:
+                    data = await loop.run_in_executor(executor, _fetch_json, url)
+                except Exception:
+                    break
+
+            results = data.get("results", [])
+            if not results:
+                break
+
+            for item in results:
+                if len(all_rows) >= limit:
+                    break
+                title = item.get("title", "")
+                if not title:
+                    continue
+                contributors = item.get("contributors", [])
+                artist = ""
+                for c in contributors:
+                    agent = c.get("agent", {})
+                    label = agent.get("label", "")
+                    if label and label != "Unknown":
+                        artist = label
+                        break
+                if not artist:
+                    continue
+                thumbnail = item.get("thumbnail", {}) or {}
+                image_url = thumbnail.get("url", "")
+                if not image_url:
+                    continue
+                year = item.get("production", [{}])[0].get("date", {}).get("earliest", 0) if item.get("production") else 0
+                art_id = f"wellcome-{item.get('id', page * per_page + len(all_rows))}"
+                all_rows.append({
+                    "source_id": art_id, "id": art_id, "title": title,
+                    "artist": artist, "year": year,
+                    "movement": "", "origin": "", "medium": "",
+                    "museum": "Wellcome Collection",
+                    "image_url": image_url, "image_url_3d": image_url, "image_url_hd": image_url,
+                    "dimensions": "", "description": "", "description_long": "",
+                    "audio_narration": "", "tags": [], "highlight": False, "source_api": "wellcome",
+                })
+            page += 1
+
+        return all_rows
+
+    async def _fetch_finna(self, limit: int) -> list[dict]:
+        import urllib.parse
+        logger.info(f"Fetching up to {limit} from Finna")
+        all_rows = []
+        page = 1
+        per_page = 100
+        loop = asyncio.get_event_loop()
+
+        while len(all_rows) < limit:
+            url = f"{FINNA_API}?lookfor=painting&limit={per_page}&page={page}&field[]=title&field[]=images&field[]=buildings&field[]=year&field[]=authors"
+            async with self.sem:
+                try:
+                    data = await loop.run_in_executor(executor, _fetch_json, url)
+                except Exception:
+                    break
+
+            records = data.get("records", [])
+            if not records:
+                break
+
+            for item in records:
+                if len(all_rows) >= limit:
+                    break
+                title = item.get("title", "")
+                if not title:
+                    continue
+                authors = item.get("authors", [])
+                if not authors:
+                    continue
+                artist = authors[0] if isinstance(authors, list) else str(authors)
+                images = item.get("images", [])
+                image_url = images[0] if images else ""
+                if not image_url:
+                    continue
+                art_id = f"finna-{item.get('id', page * per_page + len(all_rows))}"
+                all_rows.append({
+                    "source_id": art_id, "id": art_id, "title": title,
+                    "artist": artist, "year": item.get("year", 0) or 0,
+                    "movement": "", "origin": "", "medium": "",
+                    "museum": f"Finna - {item.get('buildings', [''])[0] if item.get('buildings') else ''}",
+                    "image_url": image_url, "image_url_3d": image_url, "image_url_hd": image_url,
+                    "dimensions": "", "description": "", "description_long": "",
+                    "audio_narration": "", "tags": [], "highlight": False, "source_api": "finna",
+                })
+            page += 1
+
+        return all_rows
+
+    async def _fetch_wikimedia(self, limit: int) -> list[dict]:
+        import urllib.parse, re
+        logger.info(f"Fetching up to {limit} from Wikimedia Commons")
+        all_rows = []
+        page = 1
+        per_page = 50
+        loop = asyncio.get_event_loop()
+
+        while len(all_rows) < limit:
+            offset = (page - 1) * per_page
+            url = f"{WIKIMEDIA_API}?action=query&list=search&srsearch=painting+haswbstatement:P180&srlimit={per_page}&sroffset={offset}&format=json"
+            async with self.sem:
+                try:
+                    data = await loop.run_in_executor(executor, _fetch_json, url)
+                except Exception:
+                    break
+
+            results = data.get("query", {}).get("search", [])
+            if not results:
+                break
+
+            for item in results:
+                if len(all_rows) >= limit:
+                    break
+                title = item.get("title", "").replace("File:", "").replace("_", " ")
+                if not title:
+                    continue
+                file_title = urllib.parse.quote(item["title"].replace("File:", ""))
+                img_url = f"{WIKIMEDIA_API}?action=query&titles=File:{file_title}&prop=imageinfo&iiprop=url|extmetadata&format=json"
+                try:
+                    info = await loop.run_in_executor(executor, _fetch_json, img_url)
+                except Exception:
+                    continue
+                pages = info.get("query", {}).get("pages", {})
+                img_info = None
+                for p in pages.values():
+                    img_info = p.get("imageinfo", [None])[0] if p.get("imageinfo") else None
+                    break
+                if not img_info:
+                    continue
+                image_url = img_info.get("url", "")
+                if not image_url:
+                    continue
+                extmeta = img_info.get("extmetadata", {}) or {}
+                artist = (extmeta.get("Artist", {}) or {}).get("value", "") or ""
+                if not artist:
+                    continue
+                year = 0
+                date_str = (extmeta.get("DateTimeOriginal", {}) or {}).get("value", "") or ""
+                if date_str:
+                    m = re.search(r"\d{4}", date_str)
+                    if m:
+                        year = int(m.group())
+                art_id = f"wikimedia-{item.get('pageid', page * per_page + len(all_rows))}"
+                all_rows.append({
+                    "source_id": art_id, "id": art_id, "title": title,
+                    "artist": artist, "year": year,
+                    "movement": "", "origin": "", "medium": "",
+                    "museum": "Wikimedia Commons",
+                    "image_url": image_url, "image_url_3d": image_url, "image_url_hd": image_url,
+                    "dimensions": "", "description": "", "description_long": "",
+                    "audio_narration": "", "tags": [], "highlight": False, "source_api": "wikimedia",
+                })
+            page += 1
 
         return all_rows

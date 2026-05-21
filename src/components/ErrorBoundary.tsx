@@ -38,11 +38,13 @@ export default class ErrorBoundary extends Component<Props, State> {
             <p className="text-[#B8B2A4] text-sm font-light mb-6 leading-relaxed">
               A client-side error occurred. The error has been logged to the console.
             </p>
-            <div className="p-4 rounded-[12px] bg-[#161616] border border-[#232323] mb-8 text-left">
-              <p className="text-[#8FA3B8] text-xs font-mono break-all leading-relaxed">
-                {this.state.error?.message || "Unknown error"}
-              </p>
-            </div>
+            {process.env.NODE_ENV === "development" && this.state.error && (
+              <div className="p-4 rounded-[12px] bg-[#161616] border border-[#232323] mb-8 text-left">
+                <p className="text-[#8FA3B8] text-xs font-mono break-all leading-relaxed">
+                  {this.state.error.message}
+                </p>
+              </div>
+            )}
             <button
               onClick={() => window.location.reload()}
               className="px-8 py-3 bg-[#F5F2EA] text-[#050505] font-medium text-xs tracking-[0.08em] uppercase rounded-[12px] hover:bg-[#E6E6E6] transition-all duration-500"

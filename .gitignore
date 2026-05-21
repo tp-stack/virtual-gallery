@@ -3,4 +3,7 @@ node_modules
 *.pyc
 __pycache__
 .vercel
+.env
+.env.local
+.env.*.local
 public/data/artworks.json

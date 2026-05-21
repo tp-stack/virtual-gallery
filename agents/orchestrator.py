@@ -29,7 +29,7 @@ class Orchestrator:
     async def run(self):
         logger.info("Starting Virtual Gallery Agent Pipeline")
 
-        raw_artworks = await self.curator.select_artworks(api_limit=100000)
+        raw_artworks = await self.curator.select_artworks(api_limit=500000)
         self._log_step("curator_select", len(raw_artworks))
         logger.info(f"Curator selected {len(raw_artworks)} artworks")
 

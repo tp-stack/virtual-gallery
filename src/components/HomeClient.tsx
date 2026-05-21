@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 export default function HomeClient() {
   const [artworks, setArtworks] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any>(null);
+  const [yearRange, setYearRange] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,6 +18,13 @@ export default function HomeClient() {
       .then(([artRes, galRes]) => {
         const arts = artRes.data || [];
         setArtworks(arts);
+
+        const years = arts.map((a: any) => a.year).filter((y: number) => y > 0);
+        if (years.length > 0) {
+          const min = Math.min(...years);
+          const max = Math.max(...years);
+          setYearRange(min === max ? `${min}` : `${min}–${max}`);
+        }
 
         if (galRes && galRes.rooms) {
           setGallery({
@@ -105,8 +113,8 @@ export default function HomeClient() {
               <p className="text-[#B8B2A4] text-xs tracking-[0.12em] uppercase mt-2 font-light">Galleries</p>
             </div>
             <div>
-              <p className="text-3xl font-thin text-[#F5F2EA]">500+</p>
-              <p className="text-[#B8B2A4] text-xs tracking-[0.12em] uppercase mt-2 font-light">Years</p>
+              <p className="text-3xl font-thin text-[#F5F2EA]">{yearRange || (loading ? "..." : "—")}</p>
+              <p className="text-[#B8B2A4] text-xs tracking-[0.12em] uppercase mt-2 font-light">Centuries</p>
             </div>
           </motion.div>
         </div>

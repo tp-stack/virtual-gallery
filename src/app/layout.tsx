@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import PrototypeBanner from "@/components/PrototypeBanner";
 
 export const metadata: Metadata = {
   title: "Virtual Gallery — Public Domain Masterpieces",
-  description: "A virtual gallery of the world's greatest public-domain artworks, curated by an AI multi-agent pipeline.",
+  description:
+    "A research prototype exploring AI-curated virtual gallery experiences using public domain artworks.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -15,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ErrorBoundary>
           <Navbar />
           {children}
+          <PrototypeBanner />
         </ErrorBoundary>
       </body>
     </html>

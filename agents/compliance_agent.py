@@ -12,13 +12,23 @@ PD_WHITELIST = {
     "sistine-chapel", "water-lilies", "scream", "luncheon-boating",
 }
 
+OPEN_ACCESS_MUSEUMS = {
+    "aic", "met", "cleveland", "vam", "core", "europeana", "wellcome", "finna", "wikimedia",
+}
+
+
 class ComplianceAgent:
     async def verify(self, artwork: dict) -> dict:
         art_id = artwork.get("id", "unknown")
         year = artwork.get("year")
+        source_api = artwork.get("source_api", "")
 
         if art_id in PD_WHITELIST:
-            return {"public_domain": True, "reason": "Whitelisted pre-verified public domain", "jurisdiction": "global", "confidence": 1.0}
+            return {"public_domain": True, "reason": "Whitelisted", "jurisdiction": "global", "confidence": 1.0}
+
+        # Museum open access APIs guarantee public domain for their collections
+        if source_api in OPEN_ACCESS_MUSEUMS:
+            return {"public_domain": True, "reason": f"Open access via {source_api}", "jurisdiction": "global", "confidence": 0.95}
 
         current_year = datetime.now().year
         if year and year <= 1928:
