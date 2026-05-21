@@ -5,10 +5,15 @@ import httpx
 from pathlib import Path
 
 SUPABASE_URL = os.environ.get("NEXT_PUBLIC_SUPABASE_URL", "")
-SUPABASE_ANON_KEY = os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY", "")
+# Prefer secret key for write operations; fall back to anon key
+SUPABASE_KEY = (
+    os.environ.get("SUPABASE_SECRET_KEY")
+    or os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    or ""
+)
 
-if not SUPABASE_URL or not SUPABASE_ANON_KEY:
-    print("ERROR: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set")
+if not SUPABASE_URL or not SUPABASE_KEY:
+    print("ERROR: NEXT_PUBLIC_SUPABASE_URL and (SUPABASE_SECRET_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY) must be set")
     sys.exit(1)
 
 DATA_PATH = Path(__file__).parent.parent / "public" / "data" / "artworks.json"
@@ -24,9 +29,12 @@ positions = data.get("gallery", {}).get("artwork_positions", {})
 
 print(f"Uploading {len(artworks)} artworks to Supabase...")
 
+key_type = "secret" if os.environ.get("SUPABASE_SECRET_KEY") else "anon"
+print(f"Using {key_type} key for write operations")
+
 headers = {
-    "apikey": SUPABASE_ANON_KEY,
-    "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
     "Content-Type": "application/json",
     "Prefer": "resolution=merge-duplicates",
 }

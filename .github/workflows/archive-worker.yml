@@ -37,6 +37,9 @@ jobs:
         run: python scripts/upload_to_supabase.py
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          # Use a Supabase secret key (sb_secret_...) for write operations.
+          # Falls back to SUPABASE_ANON_KEY if SECRET_KEY is not set.
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Commit updated artworks.json

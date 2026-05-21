@@ -226,6 +226,20 @@ export default function HomeClient() {
           <p className="text-[#555] text-2xs mt-4 font-light tracking-wide">
             Curated · Verified · Free · Built with a multi-agent AI pipeline
           </p>
+          <div className="mt-8 flex justify-center gap-8">
+            <Link
+              href="/disclaimer"
+              className="text-[#B8B2A4] hover:text-[#C8A96A] transition-colors duration-500 text-2xs tracking-[0.12em] uppercase font-light"
+            >
+              Disclaimer
+            </Link>
+            <Link
+              href="/methodology"
+              className="text-[#B8B2A4] hover:text-[#C8A96A] transition-colors duration-500 text-2xs tracking-[0.12em] uppercase font-light"
+            >
+              Methodology
+            </Link>
+          </div>
         </div>
       </footer>
     </>

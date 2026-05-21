@@ -1,18 +1,27 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { getRooms } from "@/lib/data";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 const ROOM_WIDTH = 30;
 const ROOM_DEPTH = 20;
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { allowed, remaining, resetAt } = rateLimit(getClientIp(request));
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Try again shortly." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)) } }
+    );
+  }
+
   const supabase = getSupabaseClient();
   if (supabase) {
     // Use raw Supabase REST API to bypass client-side limits
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
     if (supabaseUrl && supabaseKey) {
       try {

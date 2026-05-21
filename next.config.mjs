@@ -4,6 +4,7 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "upload.wikimedia.org" },
       { protocol: "https", hostname: "**.wikimedia.org" },
+      { protocol: "https", hostname: "images.metmuseum.org" },
     ],
   },
   async headers() {

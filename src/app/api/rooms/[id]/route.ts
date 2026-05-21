@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { getArtworksPaginated } from "@/lib/data";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 function safeInt(value: string | null, fallback: number): number {
   if (!value) return fallback;
@@ -9,11 +10,19 @@ function safeInt(value: string | null, fallback: number): number {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { allowed, remaining, resetAt } = rateLimit(getClientIp(request));
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Try again shortly." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)) } }
+    );
+  }
+
   const roomId = safeInt(params.id, -1);
-  if (isNaN(roomId)) {
+  if (roomId < 0) {
     return NextResponse.json({ error: "Invalid room ID" }, { status: 400 });
   }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import { Search, Grid3X3, Columns, List } from "lucide-react";
 
 export default function FilterBar({
@@ -19,6 +20,19 @@ export default function FilterBar({
   viewMode: string;
   onViewChange: (v: string) => void;
 }) {
+  const [localSearch, setLocalSearch] = useState(searchQuery);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setLocalSearch(searchQuery);
+  }, [searchQuery]);
+
+  const handleSearchInput = (value: string) => {
+    setLocalSearch(value);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => onSearchChange(value), 300);
+  };
+
   const viewIcons: Record<string, React.ReactNode> = {
     masonry: <Columns className="w-3.5 h-3.5" />,
     grid: <Grid3X3 className="w-3.5 h-3.5" />,
@@ -33,8 +47,8 @@ export default function FilterBar({
           <input
             type="text"
             placeholder="Search by title, artist, movement..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            value={localSearch}
+            onChange={(e) => handleSearchInput(e.target.value)}
             className="w-full pl-10 pr-4 py-3 rounded-[12px] bg-[#0D0D0D] border border-[#232323] text-[#F5F2EA] placeholder-[#555] focus:outline-none focus:border-[#C8A96A]/30 transition-all duration-500 text-sm font-light"
           />
         </div>

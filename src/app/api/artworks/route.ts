@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { getArtworksPaginated } from "@/lib/data";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 function safeInt(value: string | null, fallback: number): number {
   if (!value) return fallback;
@@ -9,6 +10,14 @@ function safeInt(value: string | null, fallback: number): number {
 }
 
 export async function GET(request: NextRequest) {
+  const { allowed, remaining, resetAt } = rateLimit(getClientIp(request));
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Try again shortly." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)) } }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const page = Math.max(1, safeInt(searchParams.get("page"), 1));
   const limit = Math.min(Math.max(1, safeInt(searchParams.get("limit"), 50)), 100);
