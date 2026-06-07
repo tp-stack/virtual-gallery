@@ -47,9 +47,13 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         search,
+        movement,
         roomId,
         artist,
         medium,
+        institution,
+        year_min,
+        year_max,
       });
       return NextResponse.json({ ...result, source: "fde" });
     } catch (error) {

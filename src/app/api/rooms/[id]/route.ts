@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { getArtworksPaginated, getStreamRoom } from "@/lib/data";
+import { hasFdeDatabaseConfig, listFdeRoomArtworks } from "@/lib/fde-db";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 function safeInt(value: string | null, fallback: number): number {
@@ -39,6 +40,18 @@ export async function GET(
   const streamRoom = getStreamRoom(roomId);
   if (streamRoom.length > 0) {
     return NextResponse.json({ room_id: roomId, artworks: streamRoom, source: "stream" });
+  }
+
+  if (hasFdeDatabaseConfig()) {
+    try {
+      const result = await listFdeRoomArtworks(roomId, 100);
+      return NextResponse.json({ room_id: roomId, artworks: result.data, source: "fde" });
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "Failed to load FDE room." },
+        { status: 500 }
+      );
+    }
   }
 
   // Try Supabase first

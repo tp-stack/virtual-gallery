@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
 import { getRooms, getStreamManifest, getStreamRooms } from "@/lib/data";
+import { getFdeGalleryRooms, hasFdeDatabaseConfig } from "@/lib/fde-db";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 const ROOM_WIDTH = 30;
-  const ROOM_DEPTH = 20;
+const ROOM_DEPTH = 20;
 const MAX_ROOMS = 5;
 
 export async function GET(request: NextRequest) {
@@ -28,6 +29,17 @@ export async function GET(request: NextRequest) {
       dimensions: { width: ROOM_WIDTH, height: 5, depth: ROOM_DEPTH },
       source: "stream",
     });
+  }
+
+  if (hasFdeDatabaseConfig()) {
+    try {
+      return NextResponse.json({ ...(await getFdeGalleryRooms(120)), source: "fde" });
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "Failed to load FDE gallery rooms." },
+        { status: 500 }
+      );
+    }
   }
 
   const supabase = getSupabaseClient();
