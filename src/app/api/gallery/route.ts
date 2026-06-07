@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
-import { getRooms } from "@/lib/data";
+import { getRooms, getStreamManifest, getStreamRooms } from "@/lib/data";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 const ROOM_WIDTH = 30;
-const ROOM_DEPTH = 20;
+  const ROOM_DEPTH = 20;
+const MAX_ROOMS = 5;
 
 export async function GET(request: NextRequest) {
   const { allowed, remaining, resetAt } = rateLimit(getClientIp(request));
@@ -15,6 +16,18 @@ export async function GET(request: NextRequest) {
       { error: "Too many requests. Try again shortly." },
       { status: 429, headers: { "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)) } }
     );
+  }
+
+  const streamManifest = getStreamManifest();
+  const streamRooms = getStreamRooms();
+  if (streamManifest && streamRooms) {
+    return NextResponse.json({
+      rooms: streamRooms,
+      total_rooms: streamManifest.rooms,
+      displayed_rooms: streamRooms.length,
+      dimensions: { width: ROOM_WIDTH, height: 5, depth: ROOM_DEPTH },
+      source: "stream",
+    });
   }
 
   const supabase = getSupabaseClient();
@@ -41,13 +54,14 @@ export async function GET(request: NextRequest) {
               (a: any, b: any) => a - b
             );
 
-            const rooms = roomIds.map((rid: any) => ({
+            let rooms = roomIds.map((rid: any) => ({
               id: `room-${rid}`,
               room_id: rid,
               position: { x: (rid % 3) * ROOM_WIDTH, y: 0, z: Math.floor(rid / 3) * (ROOM_DEPTH + 2) },
               width: ROOM_WIDTH,
               depth: ROOM_DEPTH,
             }));
+            rooms = rooms.slice(0, MAX_ROOMS);
 
             return NextResponse.json({
               rooms,
@@ -72,13 +86,14 @@ export async function GET(request: NextRequest) {
         (a: any, b: any) => a - b
       );
 
-      const rooms = roomIds.map((rid: any) => ({
+      let rooms = roomIds.map((rid: any) => ({
         id: `room-${rid}`,
         room_id: rid,
         position: { x: (rid % 3) * ROOM_WIDTH, y: 0, z: Math.floor(rid / 3) * (ROOM_DEPTH + 2) },
         width: ROOM_WIDTH,
         depth: ROOM_DEPTH,
       }));
+      rooms = rooms.slice(0, MAX_ROOMS);
 
       return NextResponse.json({
         rooms,

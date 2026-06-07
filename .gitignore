@@ -6,4 +6,18 @@ __pycache__
 .env
 .env.local
 .env.*.local
+deploy/selfhost/.env
 public/data/artworks.json
+public/data/*.ndjson
+public/data/*state.json
+public/data/artworks-stream/
+public/data/artwork-exports/
+
+# Agent Orchestration System (local only)
+agents/memory/
+agents/logs/
+agents/queues/
+reports/
+agents/.tmp
+venv/
+.venv/

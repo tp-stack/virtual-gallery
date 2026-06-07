@@ -4,6 +4,11 @@ const path = require("path");
 
 const dataPath = path.join(__dirname, "..", "public", "data", "artworks.json");
 
+if (process.env.SKIP_ENSURE_DATA === "1") {
+  console.log("[ensure-data] SKIP_ENSURE_DATA=1, skipping local artwork generation");
+  process.exit(0);
+}
+
 if (fs.existsSync(dataPath)) {
   const stats = fs.statSync(dataPath);
   if (stats.size > 1000) {

@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
-import { getArtworksPaginated } from "@/lib/data";
+import { getArtworksPaginated, getStreamRoom } from "@/lib/data";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 function safeInt(value: string | null, fallback: number): number {
   if (!value) return fallback;
   const n = parseInt(value);
   return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+function normalizeDbArtwork(row: any) {
+  const image = row.image_url || row.image_url_3d || row.image_url_hd || "";
+  return {
+    ...row,
+    image_url: image,
+    image_url_3d: row.image_url_3d || image,
+    image_url_hd: row.image_url_hd || image,
+  };
 }
 
 export async function GET(
@@ -26,6 +36,11 @@ export async function GET(
     return NextResponse.json({ error: "Invalid room ID" }, { status: 400 });
   }
 
+  const streamRoom = getStreamRoom(roomId);
+  if (streamRoom.length > 0) {
+    return NextResponse.json({ room_id: roomId, artworks: streamRoom, source: "stream" });
+  }
+
   // Try Supabase first
   const supabase = getSupabaseClient();
   if (supabase) {
@@ -36,7 +51,7 @@ export async function GET(
       .order("position_z", { ascending: true });
 
     if (!error && data) {
-      return NextResponse.json({ room_id: roomId, artworks: data, source: "supabase" });
+      return NextResponse.json({ room_id: roomId, artworks: data.map(normalizeDbArtwork), source: "supabase" });
     }
   }
 

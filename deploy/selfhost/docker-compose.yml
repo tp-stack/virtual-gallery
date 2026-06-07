@@ -1,0 +1,34 @@
+services:
+  virtual-gallery:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    image: virtual-gallery:local
+    container_name: virtual-gallery
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      PORT: "3458"
+      HOSTNAME: "127.0.0.1"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: virtual-gallery-caddy
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - virtual-gallery
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-http://:8088}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

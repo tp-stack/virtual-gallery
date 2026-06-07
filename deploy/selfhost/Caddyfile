@@ -1,0 +1,9 @@
+{$SITE_ADDRESS:http://:8088} {
+	reverse_proxy 127.0.0.1:3458
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+}
