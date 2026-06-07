@@ -181,7 +181,7 @@ export async function listFdeArtworks(params: {
   }
 
   const offset = (params.page - 1) * params.limit;
-  const limitParam = addValue(params.limit);
+  const fetchLimitParam = addValue(params.limit + 1);
   const offsetParam = addValue(offset);
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
@@ -211,7 +211,6 @@ export async function listFdeArtworks(params: {
     room_id: number | null;
     source_api: string | null;
     created_at: string;
-    total_count: string;
   }>(
     `
       SELECT
@@ -239,20 +238,21 @@ export async function listFdeArtworks(params: {
         rotation_y,
         room_id,
         source_api,
-        created_at,
-        count(*) OVER ()::text AS total_count
+        created_at
       FROM ${quoteIdentifier(OPEN_ACCESS_TABLE)}
       ${whereSql}
-      ORDER BY room_id ASC NULLS LAST, position_z ASC NULLS LAST, created_at DESC, title ASC
-      LIMIT ${limitParam}
+      ORDER BY source_id ASC
+      LIMIT ${fetchLimitParam}
       OFFSET ${offsetParam}
     `,
     values
   );
 
-  const total = result.rows.length ? Number(result.rows[0].total_count) : 0;
+  const hasMore = result.rows.length > params.limit;
+  const rows = result.rows.slice(0, params.limit);
+  const total = offset + rows.length + (hasMore ? 1 : 0);
   return {
-    data: result.rows.map(({ total_count, ...row }) => ({
+    data: rows.map((row) => ({
       ...row,
       year: row.year || 0,
       year_text: row.year ? String(row.year) : "",
@@ -263,7 +263,8 @@ export async function listFdeArtworks(params: {
     total,
     page: params.page,
     limit: params.limit,
-    totalPages: Math.ceil(total / params.limit),
+    totalPages: hasMore ? params.page + 1 : params.page,
+    hasMore,
   };
 }
 

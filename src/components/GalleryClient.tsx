@@ -12,6 +12,11 @@ export default function GalleryClient() {
   const [total, setTotal] = useState(0);
   const [selected, setSelected] = useState<any>(null);
   const [activeMovement, setActiveMovement] = useState<string | null>(null);
+  const [activeArtist, setActiveArtist] = useState<string | null>(null);
+  const [activeMedium, setActiveMedium] = useState<string | null>(null);
+  const [activeInstitution, setActiveInstitution] = useState<string | null>(null);
+  const [activeYearMin, setActiveYearMin] = useState<number | null>(null);
+  const [activeYearMax, setActiveYearMax] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("grid");
   const [loading, setLoading] = useState(false);
@@ -19,6 +24,10 @@ export default function GalleryClient() {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [movements, setMovements] = useState<{ movement: string; count: number }[]>([]);
+  const [artists, setArtists] = useState<{ artist: string; count: number }[]>([]);
+  const [mediums, setMediums] = useState<{ medium: string; count: number }[]>([]);
+  const [institutions, setInstitutions] = useState<{ institution: string; count: number }[]>([]);
+  const [yearRange, setYearRange] = useState({ min: 0, max: 0 });
   const pageRef = useRef(1);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +38,11 @@ export default function GalleryClient() {
       try {
         const params = new URLSearchParams({ page: String(pageNum), limit: "50" });
         if (activeMovement) params.set("movement", activeMovement);
+        if (activeArtist) params.set("artist", activeArtist);
+        if (activeMedium) params.set("medium", activeMedium);
+        if (activeInstitution) params.set("institution", activeInstitution);
+        if (activeYearMin) params.set("year_min", String(activeYearMin));
+        if (activeYearMax) params.set("year_max", String(activeYearMax));
         if (searchQuery) params.set("search", searchQuery);
 
         const res = await fetch(`/api/artworks?${params}`);
@@ -41,7 +55,7 @@ export default function GalleryClient() {
           setArtworks(json.data || []);
         }
         setTotal(json.total || 0);
-        setHasMore(json.data?.length === 50);
+        setHasMore(Boolean(json.hasMore ?? json.data?.length === 50));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load artworks");
       } finally {
@@ -49,7 +63,7 @@ export default function GalleryClient() {
         setInitialLoading(false);
       }
     },
-    [activeMovement, searchQuery]
+    [activeMovement, activeArtist, activeMedium, activeInstitution, activeYearMin, activeYearMax, searchQuery]
   );
 
   useEffect(() => {
@@ -59,23 +73,18 @@ export default function GalleryClient() {
     setInitialLoading(true);
     setError(null);
     fetchPage(1, false);
-  }, [activeMovement, searchQuery]);
+  }, [activeMovement, activeArtist, activeMedium, activeInstitution, activeYearMin, activeYearMax, searchQuery, fetchPage]);
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/artworks?limit=500");
+        const res = await fetch("/api/facets");
         const json = await res.json();
-        const data = json.data || [];
-        const map: Record<string, number> = {};
-        for (const art of data) {
-          map[art.movement] = (map[art.movement] || 0) + 1;
-        }
-        setMovements(
-          Object.entries(map)
-            .map(([movement, count]) => ({ movement, count }))
-            .sort((a, b) => b.count - a.count)
-        );
+        setMovements(json.movements || []);
+        setArtists(json.artists || []);
+        setMediums(json.mediums || []);
+        setInstitutions(json.institutions || []);
+        if (json.yearRange) setYearRange(json.yearRange);
       } catch {}
     })();
   }, []);
@@ -115,6 +124,19 @@ export default function GalleryClient() {
         onSearchChange={setSearchQuery}
         viewMode={viewMode}
         onViewChange={setViewMode}
+        artists={artists}
+        activeArtist={activeArtist}
+        onArtistChange={setActiveArtist}
+        mediums={mediums}
+        activeMedium={activeMedium}
+        onMediumChange={setActiveMedium}
+        institutions={institutions}
+        activeInstitution={activeInstitution}
+        onInstitutionChange={setActiveInstitution}
+        yearRange={yearRange}
+        activeYearMin={activeYearMin}
+        activeYearMax={activeYearMax}
+        onYearChange={(min, max) => { setActiveYearMin(min); setActiveYearMax(max); }}
       />
 
       <div className="mt-10">
